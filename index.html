@@ -1,0 +1,3141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campuser — Create & Manage Camps</title>
+<style>
+  :root{
+    --bg:#f4f6f3; --panel:#ffffff; --ink:#1f2a24; --muted:#6b7a72; --line:#e3e8e4;
+    --brand:#2f7d5b; --brand-dark:#245f46; --brand-soft:#e4f2ea; --accent:#f2a33a; --danger:#d9534f;
+    --shadow:0 1px 2px rgba(20,40,30,.06),0 8px 24px rgba(20,40,30,.06); --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh}
+  button{font:inherit;cursor:pointer}
+  input,select,textarea{font:inherit;color:inherit}
+  a{color:var(--brand)}
+
+  /* Sidebar */
+  .sidebar{width:240px;background:#1d3b2e;color:#dfeee6;display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh;flex-shrink:0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.3px;color:#fff;padding:4px 8px 22px}
+  .logo svg{width:32px;height:32px}
+  .nav button{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;color:#c6dccf;padding:11px 12px;border-radius:10px;font-size:15px;text-align:left;margin-bottom:4px}
+  .nav button:hover{background:rgba(255,255,255,.08);color:#fff}
+  .nav button.active{background:var(--brand);color:#fff;font-weight:600}
+  .nav svg{width:20px;height:20px;flex-shrink:0}
+  .sidebar .spacer{flex:1}
+  .sidebar .foot{font-size:12px;color:#8fb3a0;padding:8px 12px;line-height:1.5}
+  .sidebar .foot button{background:none;border:1px solid rgba(255,255,255,.2);color:#c6dccf;border-radius:8px;padding:6px 10px;font-size:12px;margin:4px 4px 0 0}
+  .sidebar .foot button:hover{background:rgba(255,255,255,.08)}
+
+  /* Main */
+  main{flex:1;min-width:0;padding:28px 36px 60px;max-width:1300px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+  h1{font-size:28px;margin:0;letter-spacing:-.4px}
+  .sub{color:var(--muted);margin:4px 0 0;font-size:14px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;padding:9px 14px;border-radius:10px;font-weight:600;font-size:14px;color:var(--ink);transition:.15s}
+  .btn:hover{border-color:#c9d3cd;background:#fafbfa}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.primary:hover{background:var(--brand-dark)}
+  .btn.danger{color:var(--danger);border-color:#f0c6c4}
+  .btn.danger:hover{background:#fdf1f0}
+  .btn.sm{padding:6px 10px;font-size:13px}
+  .btn.ghost{border-color:transparent;background:transparent}
+  .btn svg{width:16px;height:16px}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:26px}
+  .stat{background:var(--panel);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);display:flex;gap:14px;align-items:center}
+  .stat .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand)}
+  .stat .ic svg{width:22px;height:22px}
+  .stat .v{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1}
+  .stat .l{font-size:13px;color:var(--muted);margin-top:4px}
+
+  .card{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px}
+  .card h2{font-size:17px;margin:0 0 14px}
+  .grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}
+  @media(max-width:1000px){.grid2{grid-template-columns:1fr}}
+
+  /* Toolbar */
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center}
+  .search{flex:1;min-width:220px;position:relative}
+  .search input{width:100%;padding:10px 12px 10px 38px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px}
+  .search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--muted)}
+  .toolbar select{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px}
+
+  /* Camp cards */
+  .camps{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px}
+  .camp{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:.18s;display:flex;flex-direction:column}
+  .camp:hover{transform:translateY(-2px);box-shadow:0 2px 4px rgba(20,40,30,.06),0 14px 30px rgba(20,40,30,.12)}
+  .camp .band{height:92px;position:relative;display:flex;align-items:flex-end;padding:12px 16px}
+  .camp .band .emoji{font-size:38px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+  .camp .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .camp .name{font-weight:700;font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .camp .meta{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .camp .meta svg{width:14px;height:14px}
+  .pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.2px;text-transform:uppercase;white-space:nowrap}
+  .pill.upcoming{background:#e5f0fb;color:#2b64a8}
+  .pill.active{background:#e4f2ea;color:#237a4c}
+  .pill.past{background:#eeeeee;color:#666}
+  .pill.draft{background:#fff3df;color:#a86a12}
+  .progress{height:7px;background:#eef1ef;border-radius:99px;overflow:hidden}
+  .progress i{display:block;height:100%;background:var(--brand);border-radius:99px;transition:.3s}
+  .progress i.full{background:var(--accent)}
+  .cap{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+
+  .empty{text-align:center;color:var(--muted);padding:56px 20px;border:2px dashed var(--line);border-radius:var(--radius);background:#fafbfa}
+  .empty .big{font-size:44px;margin-bottom:8px}
+  .empty p{margin:6px 0 16px}
+
+  /* Detail */
+  .back{background:none;border:0;color:var(--muted);padding:0;font-size:14px;display:inline-flex;gap:6px;align-items:center;margin-bottom:12px}
+  .back:hover{color:var(--ink)}
+  .hero{border-radius:var(--radius);padding:26px 28px;color:#fff;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;box-shadow:var(--shadow);margin-bottom:20px;flex-wrap:wrap;position:relative;overflow:hidden}
+  .hero:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 90% 10%,rgba(255,255,255,.25),transparent 45%)}
+  .hero>*{position:relative}
+  .hero h1{color:#fff;font-size:30px;display:flex;align-items:center;gap:12px}
+  .hero .meta{opacity:.92;font-size:14px;margin-top:8px;display:flex;gap:18px;flex-wrap:wrap}
+  .hero .actions{display:flex;gap:8px}
+  .hero .btn{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:#fff;backdrop-filter:blur(4px)}
+  .hero .btn:hover{background:rgba(255,255,255,.28)}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+  .tabs button{background:none;border:0;padding:10px 14px;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-weight:600}
+  .tabs button.active{color:var(--brand);border-color:var(--brand)}
+  .tabs button .n{background:#eef1ef;color:var(--muted);border-radius:99px;padding:1px 7px;font-size:11px;margin-left:6px}
+
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-weight:700}
+  td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  tr:hover td{background:#fafbfa}
+  .avatar{width:32px;height:32px;border-radius:50%;display:inline-grid;place-items:center;font-weight:700;font-size:12px;color:#fff;margin-right:10px;vertical-align:middle}
+  .status-sel{padding:4px 8px;border-radius:8px;border:1px solid var(--line);font-size:13px;background:#fff}
+  .icon-btn{background:none;border:0;padding:6px;border-radius:8px;color:var(--muted);display:inline-grid;place-items:center}
+  .icon-btn:hover{background:#f0f2f0;color:var(--danger)}
+  .icon-btn svg{width:16px;height:16px}
+
+  .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  .kv div{background:#fafbfa;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+  .kv b{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;font-weight:700}
+  .kv span{font-size:15px;font-weight:600}
+  .desc{white-space:pre-wrap;line-height:1.6;color:#33413a;margin:16px 0 0}
+
+  .day{margin-bottom:18px}
+  .day h3{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:0 0 8px;display:flex;justify-content:space-between;align-items:center}
+  .act{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:#fff}
+  .act .t{font-weight:700;font-variant-numeric:tabular-nums;min-width:58px;color:var(--brand)}
+  .act .n{flex:1}
+  .act .n small{display:block;color:var(--muted);font-size:12px}
+  .act .loc{font-size:12px;color:var(--muted);background:#f0f2f0;padding:3px 8px;border-radius:99px}
+
+  .checklist label{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;border-bottom:1px solid var(--line)}
+  .checklist label:hover{background:#fafbfa}
+  .checklist input{width:17px;height:17px;accent-color:var(--brand)}
+  .checklist .done{text-decoration:line-through;color:var(--muted)}
+  .inline-add{display:flex;gap:8px;margin-top:12px}
+  .inline-add input{flex:1;padding:9px 12px;border:1px solid var(--line);border-radius:10px}
+
+  .staff{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+  .staff .p{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:center;position:relative}
+  .staff .p .avatar{width:40px;height:40px;font-size:14px;margin:0}
+  .staff .p .r{font-size:12px;color:var(--muted)}
+  .staff .p .icon-btn{position:absolute;right:6px;top:6px}
+
+  /* Announcements */
+  .feed{display:flex;flex-direction:column;gap:12px}
+  .post{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff}
+  .post.pinned{border-color:#f5d9a8;background:#fffaf1}
+  .post-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .post-title{font-weight:700;font-size:16px}
+  .post-meta{font-size:12px;color:var(--muted);margin-top:2px}
+  .post-actions{display:flex;gap:2px;flex-shrink:0}
+  .post-actions .icon-btn:hover{color:var(--ink)}
+  .post-body{margin-top:10px;line-height:1.6;white-space:pre-wrap;font-size:14px;color:#33413a}
+  .post-body a{word-break:break-all}
+  .post-link{display:flex;gap:12px;align-items:center;margin-top:12px;padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:#fafbfa;text-decoration:none;color:var(--ink)}
+  .post-link:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .post-link-ic{font-size:20px}
+  .post-link b{display:block;font-size:14px}
+  .post-link small{color:var(--muted);font-size:12px;word-break:break-all}
+
+  /* Upcoming list */
+  .ul{list-style:none;margin:0;padding:0}
+  .ul li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .ul li:last-child{border:0}
+  .ul .date{width:46px;height:46px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:800;line-height:1;flex-shrink:0}
+  .ul .date small{font-size:10px;font-weight:600;opacity:.85;text-transform:uppercase}
+  .ul .date b{font-size:18px}
+  .ul .info{flex:1;min-width:0}
+  .ul .info div{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ul .info small{color:var(--muted)}
+  .ul .in{font-size:12px;color:var(--muted);white-space:nowrap}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(20,30,25,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;backdrop-filter:blur(2px)}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:16px;width:100%;max-width:640px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:pop .18s ease}
+  @keyframes pop{from{transform:translateY(10px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+  .modal header{padding:20px 24px 0;display:flex;justify-content:space-between;align-items:center}
+  .modal header h2{margin:0;font-size:20px}
+  .modal .content{padding:18px 24px 24px}
+  .form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form .full{grid-column:1/-1}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--brand-soft);border-color:var(--brand)}
+  .field textarea{min-height:90px;resize:vertical}
+  .swatches{display:flex;gap:8px;flex-wrap:wrap}
+  .swatches span{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.12s}
+  .swatches span.sel{border-color:#fff;box-shadow:0 0 0 2px var(--ink)}
+  .emojis{display:flex;gap:6px;flex-wrap:wrap}
+  .emojis span{font-size:22px;padding:4px 6px;border-radius:8px;cursor:pointer;border:2px solid transparent}
+  .emojis span.sel{border-color:var(--brand);background:var(--brand-soft)}
+  .modal footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+  .modal footer .left{margin-right:auto}
+
+  .join-btn{display:flex;align-items:center;gap:10px;width:100%;margin-top:8px;background:rgba(242,163,58,.15);border:1px dashed rgba(242,163,58,.7);color:#ffd9a3;padding:10px 12px;border-radius:10px;font-size:14px;font-weight:600}
+  .join-btn:hover{background:rgba(242,163,58,.28);color:#fff}
+  .camp.locked .body{opacity:.55}
+  .camp.locked .band{filter:saturate(.4)}
+  .lock-tag{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.45);color:#fff;font-size:11px;font-weight:700;padding:4px 9px;border-radius:99px;display:flex;align-items:center;gap:5px;backdrop-filter:blur(3px)}
+  .lock-tag svg{width:12px;height:12px}
+  .code-card{border:1px solid #f5d9a8;background:#fffaf1}
+  .code-display{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:22px;font-weight:700;letter-spacing:2px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px;text-align:center;cursor:pointer;user-select:all;color:var(--ink)}
+  .code-display:hover{border-color:var(--brand);background:var(--brand-soft)}
+  .code-display.big{font-size:28px;padding:18px}
+  .code-input{width:100%;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:26px;font-weight:700;letter-spacing:3px;text-align:center;padding:16px;border:2px solid var(--line);border-radius:12px;outline:none}
+  .code-input:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+  .join-err{margin-top:10px;color:var(--danger);font-size:14px;text-align:center;font-weight:600}
+  .shake{animation:shake .4s}
+  @keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+  .group-tag{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;font-size:12px;font-weight:600;color:var(--brand);background:var(--brand-soft);padding:3px 9px;border-radius:99px;cursor:pointer}
+  .group-tag:hover{background:#d3eadc}
+  .group-strip{display:flex;gap:4px;flex-wrap:wrap}
+  .group-strip span{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:15px}
+  .group-strip .more{background:#eef1ef;color:var(--muted);font-size:11px;font-weight:700}
+  .qr-wrap{display:inline-block;padding:10px;background:#fff;border:1px solid var(--line);border-radius:14px}
+  .qr-wrap svg{width:260px;height:260px;display:block}
+  .wl-pos{font-size:11.5px;color:#a86a12;margin-top:4px;cursor:pointer;font-weight:600}
+  .wl-pos.first{color:var(--brand)}
+  .wl-pos.joined{color:var(--brand);cursor:default}
+  .wl-note{background:#fff8e6;border:1px solid #f5d9a8;color:#7a5410;border-radius:10px;padding:12px 14px;font-size:14px;line-height:1.5;margin-top:12px}
+  .wl-note.first{background:var(--brand-soft);border-color:#b9dcc9;color:#1f5a3f}
+  .nospots{min-height:70vh;display:flex;align-items:center;justify-content:center}
+  .nospots-box{max-width:520px;width:100%;text-align:center;background:var(--panel);border-radius:20px;box-shadow:var(--shadow);padding:44px 36px;border-top:6px solid var(--danger)}
+  .nospots-icon{font-size:56px;filter:grayscale(1);opacity:.6}
+  .nospots-badge{display:inline-block;margin:12px 0 10px;background:#fdecea;color:var(--danger);font-weight:800;letter-spacing:2px;font-size:12px;padding:4px 12px;border-radius:99px}
+  .nospots h1{font-size:24px;letter-spacing:.5px;color:var(--danger);margin:0 0 12px;line-height:1.3}
+  .nospots .sub{font-size:15px;line-height:1.6;margin:0 0 26px}
+  .nospots .btn{padding:12px 22px;font-size:15px}
+  .draft-note{background:#fff8e6;border:1px solid #f5d9a8;color:#7a5410;border-radius:10px;padding:9px 12px;font-size:13px;margin-bottom:14px}
+  .draft-note a{color:#7a5410;font-weight:700}
+  .trash{margin-top:28px;background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 20px}
+  .trash summary{cursor:pointer;font-weight:700;color:var(--muted);font-size:14px}
+  .trash .ul{margin-top:8px}
+  .trash .btn{margin-left:6px}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2a24;color:#fff;padding:11px 18px;border-radius:10px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:60}
+  .toast.show{opacity:1;transform:translateX(-50%)}
+
+  .menu-btn{display:none}
+  @media(max-width:820px){
+    .sidebar{position:fixed;left:-260px;z-index:40;transition:.2s;height:100vh}
+    .sidebar.open{left:0}
+    main{padding:18px 16px 60px}
+    .menu-btn{display:inline-flex}
+    .form{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <svg viewBox="0 0 32 32" fill="none"><path d="M16 4 3 27h26L16 4Z" fill="#f2a33a"/><path d="M16 12 9.5 27h13L16 12Z" fill="#1d3b2e"/><path d="M16 4 3 27h4L16 11l9 16h4L16 4Z" fill="#fff"/></svg>
+    Campuser
+  </div>
+  <nav class="nav">
+    <button data-view="dashboard" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard</button>
+    <button data-view="camps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3Z"/><path d="M12 11 8 21h8l-4-10Z"/></svg>Camps</button>
+    <button data-view="groups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-5h6v5M9 10h.01M15 10h.01M9 13h.01M15 13h.01"/></svg>Groups</button>
+    <button data-view="campers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 22 19"/></svg>Campers</button>
+    <button data-view="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Schedule</button>
+  </nav>
+  <button class="join-btn" onclick="openJoinModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Join camp with code</button>
+  <div class="spacer"></div>
+  <div class="foot">
+    <span id="saveBadge">Autosave on</span> · stored on this device
+    <div><button onclick="exportData()">Export</button><button onclick="document.getElementById('importFile').click()">Import</button><button onclick="resetData()">Clear all</button></div>
+    <input type="file" id="importFile" accept="application/json" hidden onchange="importData(this)">
+  </div>
+</aside>
+
+<main id="main"></main>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== Embedded QR Code Generator (MIT) — Kazuhiko Arase ===== */
+//---------------------------------------------------------------------
+//
+// QR Code Generator for JavaScript
+//
+// Copyright (c) 2009 Kazuhiko Arase
+//
+// URL: http://www.d-project.com/
+//
+// Licensed under the MIT license:
+//  http://www.opensource.org/licenses/mit-license.php
+//
+// The word 'QR Code' is registered trademark of
+// DENSO WAVE INCORPORATED
+//  http://www.denso-wave.com/qrcode/faqpatent-e.html
+//
+//---------------------------------------------------------------------
+
+var qrcode = function() {
+
+  //---------------------------------------------------------------------
+  // qrcode
+  //---------------------------------------------------------------------
+
+  /**
+   * qrcode
+   * @param typeNumber 1 to 40
+   * @param errorCorrectionLevel 'L','M','Q','H'
+   */
+  var qrcode = function(typeNumber, errorCorrectionLevel) {
+
+    var PAD0 = 0xEC;
+    var PAD1 = 0x11;
+
+    var _typeNumber = typeNumber;
+    var _errorCorrectionLevel = QRErrorCorrectionLevel[errorCorrectionLevel];
+    var _modules = null;
+    var _moduleCount = 0;
+    var _dataCache = null;
+    var _dataList = [];
+
+    var _this = {};
+
+    var makeImpl = function(test, maskPattern) {
+
+      _moduleCount = _typeNumber * 4 + 17;
+      _modules = function(moduleCount) {
+        var modules = new Array(moduleCount);
+        for (var row = 0; row < moduleCount; row += 1) {
+          modules[row] = new Array(moduleCount);
+          for (var col = 0; col < moduleCount; col += 1) {
+            modules[row][col] = null;
+          }
+        }
+        return modules;
+      }(_moduleCount);
+
+      setupPositionProbePattern(0, 0);
+      setupPositionProbePattern(_moduleCount - 7, 0);
+      setupPositionProbePattern(0, _moduleCount - 7);
+      setupPositionAdjustPattern();
+      setupTimingPattern();
+      setupTypeInfo(test, maskPattern);
+
+      if (_typeNumber >= 7) {
+        setupTypeNumber(test);
+      }
+
+      if (_dataCache == null) {
+        _dataCache = createData(_typeNumber, _errorCorrectionLevel, _dataList);
+      }
+
+      mapData(_dataCache, maskPattern);
+    };
+
+    var setupPositionProbePattern = function(row, col) {
+
+      for (var r = -1; r <= 7; r += 1) {
+
+        if (row + r <= -1 || _moduleCount <= row + r) continue;
+
+        for (var c = -1; c <= 7; c += 1) {
+
+          if (col + c <= -1 || _moduleCount <= col + c) continue;
+
+          if ( (0 <= r && r <= 6 && (c == 0 || c == 6) )
+              || (0 <= c && c <= 6 && (r == 0 || r == 6) )
+              || (2 <= r && r <= 4 && 2 <= c && c <= 4) ) {
+            _modules[row + r][col + c] = true;
+          } else {
+            _modules[row + r][col + c] = false;
+          }
+        }
+      }
+    };
+
+    var getBestMaskPattern = function() {
+
+      var minLostPoint = 0;
+      var pattern = 0;
+
+      for (var i = 0; i < 8; i += 1) {
+
+        makeImpl(true, i);
+
+        var lostPoint = QRUtil.getLostPoint(_this);
+
+        if (i == 0 || minLostPoint > lostPoint) {
+          minLostPoint = lostPoint;
+          pattern = i;
+        }
+      }
+
+      return pattern;
+    };
+
+    var setupTimingPattern = function() {
+
+      for (var r = 8; r < _moduleCount - 8; r += 1) {
+        if (_modules[r][6] != null) {
+          continue;
+        }
+        _modules[r][6] = (r % 2 == 0);
+      }
+
+      for (var c = 8; c < _moduleCount - 8; c += 1) {
+        if (_modules[6][c] != null) {
+          continue;
+        }
+        _modules[6][c] = (c % 2 == 0);
+      }
+    };
+
+    var setupPositionAdjustPattern = function() {
+
+      var pos = QRUtil.getPatternPosition(_typeNumber);
+
+      for (var i = 0; i < pos.length; i += 1) {
+
+        for (var j = 0; j < pos.length; j += 1) {
+
+          var row = pos[i];
+          var col = pos[j];
+
+          if (_modules[row][col] != null) {
+            continue;
+          }
+
+          for (var r = -2; r <= 2; r += 1) {
+
+            for (var c = -2; c <= 2; c += 1) {
+
+              if (r == -2 || r == 2 || c == -2 || c == 2
+                  || (r == 0 && c == 0) ) {
+                _modules[row + r][col + c] = true;
+              } else {
+                _modules[row + r][col + c] = false;
+              }
+            }
+          }
+        }
+      }
+    };
+
+    var setupTypeNumber = function(test) {
+
+      var bits = QRUtil.getBCHTypeNumber(_typeNumber);
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[Math.floor(i / 3)][i % 3 + _moduleCount - 8 - 3] = mod;
+      }
+
+      for (var i = 0; i < 18; i += 1) {
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+        _modules[i % 3 + _moduleCount - 8 - 3][Math.floor(i / 3)] = mod;
+      }
+    };
+
+    var setupTypeInfo = function(test, maskPattern) {
+
+      var data = (_errorCorrectionLevel << 3) | maskPattern;
+      var bits = QRUtil.getBCHTypeInfo(data);
+
+      // vertical
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 6) {
+          _modules[i][8] = mod;
+        } else if (i < 8) {
+          _modules[i + 1][8] = mod;
+        } else {
+          _modules[_moduleCount - 15 + i][8] = mod;
+        }
+      }
+
+      // horizontal
+      for (var i = 0; i < 15; i += 1) {
+
+        var mod = (!test && ( (bits >> i) & 1) == 1);
+
+        if (i < 8) {
+          _modules[8][_moduleCount - i - 1] = mod;
+        } else if (i < 9) {
+          _modules[8][15 - i - 1 + 1] = mod;
+        } else {
+          _modules[8][15 - i - 1] = mod;
+        }
+      }
+
+      // fixed module
+      _modules[_moduleCount - 8][8] = (!test);
+    };
+
+    var mapData = function(data, maskPattern) {
+
+      var inc = -1;
+      var row = _moduleCount - 1;
+      var bitIndex = 7;
+      var byteIndex = 0;
+      var maskFunc = QRUtil.getMaskFunction(maskPattern);
+
+      for (var col = _moduleCount - 1; col > 0; col -= 2) {
+
+        if (col == 6) col -= 1;
+
+        while (true) {
+
+          for (var c = 0; c < 2; c += 1) {
+
+            if (_modules[row][col - c] == null) {
+
+              var dark = false;
+
+              if (byteIndex < data.length) {
+                dark = ( ( (data[byteIndex] >>> bitIndex) & 1) == 1);
+              }
+
+              var mask = maskFunc(row, col - c);
+
+              if (mask) {
+                dark = !dark;
+              }
+
+              _modules[row][col - c] = dark;
+              bitIndex -= 1;
+
+              if (bitIndex == -1) {
+                byteIndex += 1;
+                bitIndex = 7;
+              }
+            }
+          }
+
+          row += inc;
+
+          if (row < 0 || _moduleCount <= row) {
+            row -= inc;
+            inc = -inc;
+            break;
+          }
+        }
+      }
+    };
+
+    var createBytes = function(buffer, rsBlocks) {
+
+      var offset = 0;
+
+      var maxDcCount = 0;
+      var maxEcCount = 0;
+
+      var dcdata = new Array(rsBlocks.length);
+      var ecdata = new Array(rsBlocks.length);
+
+      for (var r = 0; r < rsBlocks.length; r += 1) {
+
+        var dcCount = rsBlocks[r].dataCount;
+        var ecCount = rsBlocks[r].totalCount - dcCount;
+
+        maxDcCount = Math.max(maxDcCount, dcCount);
+        maxEcCount = Math.max(maxEcCount, ecCount);
+
+        dcdata[r] = new Array(dcCount);
+
+        for (var i = 0; i < dcdata[r].length; i += 1) {
+          dcdata[r][i] = 0xff & buffer.getBuffer()[i + offset];
+        }
+        offset += dcCount;
+
+        var rsPoly = QRUtil.getErrorCorrectPolynomial(ecCount);
+        var rawPoly = qrPolynomial(dcdata[r], rsPoly.getLength() - 1);
+
+        var modPoly = rawPoly.mod(rsPoly);
+        ecdata[r] = new Array(rsPoly.getLength() - 1);
+        for (var i = 0; i < ecdata[r].length; i += 1) {
+          var modIndex = i + modPoly.getLength() - ecdata[r].length;
+          ecdata[r][i] = (modIndex >= 0)? modPoly.getAt(modIndex) : 0;
+        }
+      }
+
+      var totalCodeCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalCodeCount += rsBlocks[i].totalCount;
+      }
+
+      var data = new Array(totalCodeCount);
+      var index = 0;
+
+      for (var i = 0; i < maxDcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < dcdata[r].length) {
+            data[index] = dcdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      for (var i = 0; i < maxEcCount; i += 1) {
+        for (var r = 0; r < rsBlocks.length; r += 1) {
+          if (i < ecdata[r].length) {
+            data[index] = ecdata[r][i];
+            index += 1;
+          }
+        }
+      }
+
+      return data;
+    };
+
+    var createData = function(typeNumber, errorCorrectionLevel, dataList) {
+
+      var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, errorCorrectionLevel);
+
+      var buffer = qrBitBuffer();
+
+      for (var i = 0; i < dataList.length; i += 1) {
+        var data = dataList[i];
+        buffer.put(data.getMode(), 4);
+        buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+        data.write(buffer);
+      }
+
+      // calc num max data.
+      var totalDataCount = 0;
+      for (var i = 0; i < rsBlocks.length; i += 1) {
+        totalDataCount += rsBlocks[i].dataCount;
+      }
+
+      if (buffer.getLengthInBits() > totalDataCount * 8) {
+        throw 'code length overflow. ('
+          + buffer.getLengthInBits()
+          + '>'
+          + totalDataCount * 8
+          + ')';
+      }
+
+      // end code
+      if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) {
+        buffer.put(0, 4);
+      }
+
+      // padding
+      while (buffer.getLengthInBits() % 8 != 0) {
+        buffer.putBit(false);
+      }
+
+      // padding
+      while (true) {
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD0, 8);
+
+        if (buffer.getLengthInBits() >= totalDataCount * 8) {
+          break;
+        }
+        buffer.put(PAD1, 8);
+      }
+
+      return createBytes(buffer, rsBlocks);
+    };
+
+    _this.addData = function(data, mode) {
+
+      mode = mode || 'Byte';
+
+      var newData = null;
+
+      switch(mode) {
+      case 'Numeric' :
+        newData = qrNumber(data);
+        break;
+      case 'Alphanumeric' :
+        newData = qrAlphaNum(data);
+        break;
+      case 'Byte' :
+        newData = qr8BitByte(data);
+        break;
+      case 'Kanji' :
+        newData = qrKanji(data);
+        break;
+      default :
+        throw 'mode:' + mode;
+      }
+
+      _dataList.push(newData);
+      _dataCache = null;
+    };
+
+    _this.isDark = function(row, col) {
+      if (row < 0 || _moduleCount <= row || col < 0 || _moduleCount <= col) {
+        throw row + ',' + col;
+      }
+      return _modules[row][col];
+    };
+
+    _this.getModuleCount = function() {
+      return _moduleCount;
+    };
+
+    _this.make = function() {
+      if (_typeNumber < 1) {
+        var typeNumber = 1;
+
+        for (; typeNumber < 40; typeNumber++) {
+          var rsBlocks = QRRSBlock.getRSBlocks(typeNumber, _errorCorrectionLevel);
+          var buffer = qrBitBuffer();
+
+          for (var i = 0; i < _dataList.length; i++) {
+            var data = _dataList[i];
+            buffer.put(data.getMode(), 4);
+            buffer.put(data.getLength(), QRUtil.getLengthInBits(data.getMode(), typeNumber) );
+            data.write(buffer);
+          }
+
+          var totalDataCount = 0;
+          for (var i = 0; i < rsBlocks.length; i++) {
+            totalDataCount += rsBlocks[i].dataCount;
+          }
+
+          if (buffer.getLengthInBits() <= totalDataCount * 8) {
+            break;
+          }
+        }
+
+        _typeNumber = typeNumber;
+      }
+
+      makeImpl(false, getBestMaskPattern() );
+    };
+
+    _this.createTableTag = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var qrHtml = '';
+
+      qrHtml += '<table style="';
+      qrHtml += ' border-width: 0px; border-style: none;';
+      qrHtml += ' border-collapse: collapse;';
+      qrHtml += ' padding: 0px; margin: ' + margin + 'px;';
+      qrHtml += '">';
+      qrHtml += '<tbody>';
+
+      for (var r = 0; r < _this.getModuleCount(); r += 1) {
+
+        qrHtml += '<tr>';
+
+        for (var c = 0; c < _this.getModuleCount(); c += 1) {
+          qrHtml += '<td style="';
+          qrHtml += ' border-width: 0px; border-style: none;';
+          qrHtml += ' border-collapse: collapse;';
+          qrHtml += ' padding: 0px; margin: 0px;';
+          qrHtml += ' width: ' + cellSize + 'px;';
+          qrHtml += ' height: ' + cellSize + 'px;';
+          qrHtml += ' background-color: ';
+          qrHtml += _this.isDark(r, c)? '#000000' : '#ffffff';
+          qrHtml += ';';
+          qrHtml += '"/>';
+        }
+
+        qrHtml += '</tr>';
+      }
+
+      qrHtml += '</tbody>';
+      qrHtml += '</table>';
+
+      return qrHtml;
+    };
+
+    _this.createSvgTag = function(cellSize, margin, alt, title) {
+
+      var opts = {};
+      if (typeof arguments[0] == 'object') {
+        // Called by options.
+        opts = arguments[0];
+        // overwrite cellSize and margin.
+        cellSize = opts.cellSize;
+        margin = opts.margin;
+        alt = opts.alt;
+        title = opts.title;
+      }
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      // Compose alt property surrogate
+      alt = (typeof alt === 'string') ? {text: alt} : alt || {};
+      alt.text = alt.text || null;
+      alt.id = (alt.text) ? alt.id || 'qrcode-description' : null;
+
+      // Compose title property surrogate
+      title = (typeof title === 'string') ? {text: title} : title || {};
+      title.text = title.text || null;
+      title.id = (title.text) ? title.id || 'qrcode-title' : null;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var c, mc, r, mr, qrSvg='', rect;
+
+      rect = 'l' + cellSize + ',0 0,' + cellSize +
+        ' -' + cellSize + ',0 0,-' + cellSize + 'z ';
+
+      qrSvg += '<svg version="1.1" xmlns="http://www.w3.org/2000/svg"';
+      qrSvg += !opts.scalable ? ' width="' + size + 'px" height="' + size + 'px"' : '';
+      qrSvg += ' viewBox="0 0 ' + size + ' ' + size + '" ';
+      qrSvg += ' preserveAspectRatio="xMinYMin meet"';
+      qrSvg += (title.text || alt.text) ? ' role="img" aria-labelledby="' +
+          escapeXml([title.id, alt.id].join(' ').trim() ) + '"' : '';
+      qrSvg += '>';
+      qrSvg += (title.text) ? '<title id="' + escapeXml(title.id) + '">' +
+          escapeXml(title.text) + '</title>' : '';
+      qrSvg += (alt.text) ? '<description id="' + escapeXml(alt.id) + '">' +
+          escapeXml(alt.text) + '</description>' : '';
+      qrSvg += '<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>';
+      qrSvg += '<path d="';
+
+      for (r = 0; r < _this.getModuleCount(); r += 1) {
+        mr = r * cellSize + margin;
+        for (c = 0; c < _this.getModuleCount(); c += 1) {
+          if (_this.isDark(r, c) ) {
+            mc = c*cellSize+margin;
+            qrSvg += 'M' + mc + ',' + mr + rect;
+          }
+        }
+      }
+
+      qrSvg += '" stroke="transparent" fill="black"/>';
+      qrSvg += '</svg>';
+
+      return qrSvg;
+    };
+
+    _this.createDataURL = function(cellSize, margin) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      return createDataURL(size, size, function(x, y) {
+        if (min <= x && x < max && min <= y && y < max) {
+          var c = Math.floor( (x - min) / cellSize);
+          var r = Math.floor( (y - min) / cellSize);
+          return _this.isDark(r, c)? 0 : 1;
+        } else {
+          return 1;
+        }
+      } );
+    };
+
+    _this.createImgTag = function(cellSize, margin, alt) {
+
+      cellSize = cellSize || 2;
+      margin = (typeof margin == 'undefined')? cellSize * 4 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+
+      var img = '';
+      img += '<img';
+      img += '\u0020src="';
+      img += _this.createDataURL(cellSize, margin);
+      img += '"';
+      img += '\u0020width="';
+      img += size;
+      img += '"';
+      img += '\u0020height="';
+      img += size;
+      img += '"';
+      if (alt) {
+        img += '\u0020alt="';
+        img += escapeXml(alt);
+        img += '"';
+      }
+      img += '/>';
+
+      return img;
+    };
+
+    var escapeXml = function(s) {
+      var escaped = '';
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charAt(i);
+        switch(c) {
+        case '<': escaped += '&lt;'; break;
+        case '>': escaped += '&gt;'; break;
+        case '&': escaped += '&amp;'; break;
+        case '"': escaped += '&quot;'; break;
+        default : escaped += c; break;
+        }
+      }
+      return escaped;
+    };
+
+    var _createHalfASCII = function(margin) {
+      var cellSize = 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r1, r2, p;
+
+      var blocks = {
+        '██': '█',
+        '█ ': '▀',
+        ' █': '▄',
+        '  ': ' '
+      };
+
+      var blocksLastLineNoMargin = {
+        '██': '▀',
+        '█ ': '▀',
+        ' █': ' ',
+        '  ': ' '
+      };
+
+      var ascii = '';
+      for (y = 0; y < size; y += 2) {
+        r1 = Math.floor((y - min) / cellSize);
+        r2 = Math.floor((y + 1 - min) / cellSize);
+        for (x = 0; x < size; x += 1) {
+          p = '█';
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r1, Math.floor((x - min) / cellSize))) {
+            p = ' ';
+          }
+
+          if (min <= x && x < max && min <= y+1 && y+1 < max && _this.isDark(r2, Math.floor((x - min) / cellSize))) {
+            p += ' ';
+          }
+          else {
+            p += '█';
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          ascii += (margin < 1 && y+1 >= max) ? blocksLastLineNoMargin[p] : blocks[p];
+        }
+
+        ascii += '\n';
+      }
+
+      if (size % 2 && margin > 0) {
+        return ascii.substring(0, ascii.length - size - 1) + Array(size+1).join('▀');
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.createASCII = function(cellSize, margin) {
+      cellSize = cellSize || 1;
+
+      if (cellSize < 2) {
+        return _createHalfASCII(margin);
+      }
+
+      cellSize -= 1;
+      margin = (typeof margin == 'undefined')? cellSize * 2 : margin;
+
+      var size = _this.getModuleCount() * cellSize + margin * 2;
+      var min = margin;
+      var max = size - margin;
+
+      var y, x, r, p;
+
+      var white = Array(cellSize+1).join('██');
+      var black = Array(cellSize+1).join('  ');
+
+      var ascii = '';
+      var line = '';
+      for (y = 0; y < size; y += 1) {
+        r = Math.floor( (y - min) / cellSize);
+        line = '';
+        for (x = 0; x < size; x += 1) {
+          p = 1;
+
+          if (min <= x && x < max && min <= y && y < max && _this.isDark(r, Math.floor((x - min) / cellSize))) {
+            p = 0;
+          }
+
+          // Output 2 characters per pixel, to create full square. 1 character per pixels gives only half width of square.
+          line += p ? white : black;
+        }
+
+        for (r = 0; r < cellSize; r += 1) {
+          ascii += line + '\n';
+        }
+      }
+
+      return ascii.substring(0, ascii.length-1);
+    };
+
+    _this.renderTo2dContext = function(context, cellSize) {
+      cellSize = cellSize || 2;
+      var length = _this.getModuleCount();
+      for (var row = 0; row < length; row++) {
+        for (var col = 0; col < length; col++) {
+          context.fillStyle = _this.isDark(row, col) ? 'black' : 'white';
+          context.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrcode.stringToBytes
+  //---------------------------------------------------------------------
+
+  qrcode.stringToBytesFuncs = {
+    'default' : function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        bytes.push(c & 0xff);
+      }
+      return bytes;
+    }
+  };
+
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['default'];
+
+  //---------------------------------------------------------------------
+  // qrcode.createStringToBytes
+  //---------------------------------------------------------------------
+
+  /**
+   * @param unicodeData base64 string of byte array.
+   * [16bit Unicode],[16bit Bytes], ...
+   * @param numChars
+   */
+  qrcode.createStringToBytes = function(unicodeData, numChars) {
+
+    // create conversion map.
+
+    var unicodeMap = function() {
+
+      var bin = base64DecodeInputStream(unicodeData);
+      var read = function() {
+        var b = bin.read();
+        if (b == -1) throw 'eof';
+        return b;
+      };
+
+      var count = 0;
+      var unicodeMap = {};
+      while (true) {
+        var b0 = bin.read();
+        if (b0 == -1) break;
+        var b1 = read();
+        var b2 = read();
+        var b3 = read();
+        var k = String.fromCharCode( (b0 << 8) | b1);
+        var v = (b2 << 8) | b3;
+        unicodeMap[k] = v;
+        count += 1;
+      }
+      if (count != numChars) {
+        throw count + ' != ' + numChars;
+      }
+
+      return unicodeMap;
+    }();
+
+    var unknownChar = '?'.charCodeAt(0);
+
+    return function(s) {
+      var bytes = [];
+      for (var i = 0; i < s.length; i += 1) {
+        var c = s.charCodeAt(i);
+        if (c < 128) {
+          bytes.push(c);
+        } else {
+          var b = unicodeMap[s.charAt(i)];
+          if (typeof b == 'number') {
+            if ( (b & 0xff) == b) {
+              // 1byte
+              bytes.push(b);
+            } else {
+              // 2bytes
+              bytes.push(b >>> 8);
+              bytes.push(b & 0xff);
+            }
+          } else {
+            bytes.push(unknownChar);
+          }
+        }
+      }
+      return bytes;
+    };
+  };
+
+  //---------------------------------------------------------------------
+  // QRMode
+  //---------------------------------------------------------------------
+
+  var QRMode = {
+    MODE_NUMBER :    1 << 0,
+    MODE_ALPHA_NUM : 1 << 1,
+    MODE_8BIT_BYTE : 1 << 2,
+    MODE_KANJI :     1 << 3
+  };
+
+  //---------------------------------------------------------------------
+  // QRErrorCorrectionLevel
+  //---------------------------------------------------------------------
+
+  var QRErrorCorrectionLevel = {
+    L : 1,
+    M : 0,
+    Q : 3,
+    H : 2
+  };
+
+  //---------------------------------------------------------------------
+  // QRMaskPattern
+  //---------------------------------------------------------------------
+
+  var QRMaskPattern = {
+    PATTERN000 : 0,
+    PATTERN001 : 1,
+    PATTERN010 : 2,
+    PATTERN011 : 3,
+    PATTERN100 : 4,
+    PATTERN101 : 5,
+    PATTERN110 : 6,
+    PATTERN111 : 7
+  };
+
+  //---------------------------------------------------------------------
+  // QRUtil
+  //---------------------------------------------------------------------
+
+  var QRUtil = function() {
+
+    var PATTERN_POSITION_TABLE = [
+      [],
+      [6, 18],
+      [6, 22],
+      [6, 26],
+      [6, 30],
+      [6, 34],
+      [6, 22, 38],
+      [6, 24, 42],
+      [6, 26, 46],
+      [6, 28, 50],
+      [6, 30, 54],
+      [6, 32, 58],
+      [6, 34, 62],
+      [6, 26, 46, 66],
+      [6, 26, 48, 70],
+      [6, 26, 50, 74],
+      [6, 30, 54, 78],
+      [6, 30, 56, 82],
+      [6, 30, 58, 86],
+      [6, 34, 62, 90],
+      [6, 28, 50, 72, 94],
+      [6, 26, 50, 74, 98],
+      [6, 30, 54, 78, 102],
+      [6, 28, 54, 80, 106],
+      [6, 32, 58, 84, 110],
+      [6, 30, 58, 86, 114],
+      [6, 34, 62, 90, 118],
+      [6, 26, 50, 74, 98, 122],
+      [6, 30, 54, 78, 102, 126],
+      [6, 26, 52, 78, 104, 130],
+      [6, 30, 56, 82, 108, 134],
+      [6, 34, 60, 86, 112, 138],
+      [6, 30, 58, 86, 114, 142],
+      [6, 34, 62, 90, 118, 146],
+      [6, 30, 54, 78, 102, 126, 150],
+      [6, 24, 50, 76, 102, 128, 154],
+      [6, 28, 54, 80, 106, 132, 158],
+      [6, 32, 58, 84, 110, 136, 162],
+      [6, 26, 54, 82, 110, 138, 166],
+      [6, 30, 58, 86, 114, 142, 170]
+    ];
+    var G15 = (1 << 10) | (1 << 8) | (1 << 5) | (1 << 4) | (1 << 2) | (1 << 1) | (1 << 0);
+    var G18 = (1 << 12) | (1 << 11) | (1 << 10) | (1 << 9) | (1 << 8) | (1 << 5) | (1 << 2) | (1 << 0);
+    var G15_MASK = (1 << 14) | (1 << 12) | (1 << 10) | (1 << 4) | (1 << 1);
+
+    var _this = {};
+
+    var getBCHDigit = function(data) {
+      var digit = 0;
+      while (data != 0) {
+        digit += 1;
+        data >>>= 1;
+      }
+      return digit;
+    };
+
+    _this.getBCHTypeInfo = function(data) {
+      var d = data << 10;
+      while (getBCHDigit(d) - getBCHDigit(G15) >= 0) {
+        d ^= (G15 << (getBCHDigit(d) - getBCHDigit(G15) ) );
+      }
+      return ( (data << 10) | d) ^ G15_MASK;
+    };
+
+    _this.getBCHTypeNumber = function(data) {
+      var d = data << 12;
+      while (getBCHDigit(d) - getBCHDigit(G18) >= 0) {
+        d ^= (G18 << (getBCHDigit(d) - getBCHDigit(G18) ) );
+      }
+      return (data << 12) | d;
+    };
+
+    _this.getPatternPosition = function(typeNumber) {
+      return PATTERN_POSITION_TABLE[typeNumber - 1];
+    };
+
+    _this.getMaskFunction = function(maskPattern) {
+
+      switch (maskPattern) {
+
+      case QRMaskPattern.PATTERN000 :
+        return function(i, j) { return (i + j) % 2 == 0; };
+      case QRMaskPattern.PATTERN001 :
+        return function(i, j) { return i % 2 == 0; };
+      case QRMaskPattern.PATTERN010 :
+        return function(i, j) { return j % 3 == 0; };
+      case QRMaskPattern.PATTERN011 :
+        return function(i, j) { return (i + j) % 3 == 0; };
+      case QRMaskPattern.PATTERN100 :
+        return function(i, j) { return (Math.floor(i / 2) + Math.floor(j / 3) ) % 2 == 0; };
+      case QRMaskPattern.PATTERN101 :
+        return function(i, j) { return (i * j) % 2 + (i * j) % 3 == 0; };
+      case QRMaskPattern.PATTERN110 :
+        return function(i, j) { return ( (i * j) % 2 + (i * j) % 3) % 2 == 0; };
+      case QRMaskPattern.PATTERN111 :
+        return function(i, j) { return ( (i * j) % 3 + (i + j) % 2) % 2 == 0; };
+
+      default :
+        throw 'bad maskPattern:' + maskPattern;
+      }
+    };
+
+    _this.getErrorCorrectPolynomial = function(errorCorrectLength) {
+      var a = qrPolynomial([1], 0);
+      for (var i = 0; i < errorCorrectLength; i += 1) {
+        a = a.multiply(qrPolynomial([1, QRMath.gexp(i)], 0) );
+      }
+      return a;
+    };
+
+    _this.getLengthInBits = function(mode, type) {
+
+      if (1 <= type && type < 10) {
+
+        // 1 - 9
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 10;
+        case QRMode.MODE_ALPHA_NUM : return 9;
+        case QRMode.MODE_8BIT_BYTE : return 8;
+        case QRMode.MODE_KANJI     : return 8;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 27) {
+
+        // 10 - 26
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 12;
+        case QRMode.MODE_ALPHA_NUM : return 11;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 10;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else if (type < 41) {
+
+        // 27 - 40
+
+        switch(mode) {
+        case QRMode.MODE_NUMBER    : return 14;
+        case QRMode.MODE_ALPHA_NUM : return 13;
+        case QRMode.MODE_8BIT_BYTE : return 16;
+        case QRMode.MODE_KANJI     : return 12;
+        default :
+          throw 'mode:' + mode;
+        }
+
+      } else {
+        throw 'type:' + type;
+      }
+    };
+
+    _this.getLostPoint = function(qrcode) {
+
+      var moduleCount = qrcode.getModuleCount();
+
+      var lostPoint = 0;
+
+      // LEVEL1
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount; col += 1) {
+
+          var sameCount = 0;
+          var dark = qrcode.isDark(row, col);
+
+          for (var r = -1; r <= 1; r += 1) {
+
+            if (row + r < 0 || moduleCount <= row + r) {
+              continue;
+            }
+
+            for (var c = -1; c <= 1; c += 1) {
+
+              if (col + c < 0 || moduleCount <= col + c) {
+                continue;
+              }
+
+              if (r == 0 && c == 0) {
+                continue;
+              }
+
+              if (dark == qrcode.isDark(row + r, col + c) ) {
+                sameCount += 1;
+              }
+            }
+          }
+
+          if (sameCount > 5) {
+            lostPoint += (3 + sameCount - 5);
+          }
+        }
+      };
+
+      // LEVEL2
+
+      for (var row = 0; row < moduleCount - 1; row += 1) {
+        for (var col = 0; col < moduleCount - 1; col += 1) {
+          var count = 0;
+          if (qrcode.isDark(row, col) ) count += 1;
+          if (qrcode.isDark(row + 1, col) ) count += 1;
+          if (qrcode.isDark(row, col + 1) ) count += 1;
+          if (qrcode.isDark(row + 1, col + 1) ) count += 1;
+          if (count == 0 || count == 4) {
+            lostPoint += 3;
+          }
+        }
+      }
+
+      // LEVEL3
+
+      for (var row = 0; row < moduleCount; row += 1) {
+        for (var col = 0; col < moduleCount - 6; col += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row, col + 1)
+              &&  qrcode.isDark(row, col + 2)
+              &&  qrcode.isDark(row, col + 3)
+              &&  qrcode.isDark(row, col + 4)
+              && !qrcode.isDark(row, col + 5)
+              &&  qrcode.isDark(row, col + 6) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount - 6; row += 1) {
+          if (qrcode.isDark(row, col)
+              && !qrcode.isDark(row + 1, col)
+              &&  qrcode.isDark(row + 2, col)
+              &&  qrcode.isDark(row + 3, col)
+              &&  qrcode.isDark(row + 4, col)
+              && !qrcode.isDark(row + 5, col)
+              &&  qrcode.isDark(row + 6, col) ) {
+            lostPoint += 40;
+          }
+        }
+      }
+
+      // LEVEL4
+
+      var darkCount = 0;
+
+      for (var col = 0; col < moduleCount; col += 1) {
+        for (var row = 0; row < moduleCount; row += 1) {
+          if (qrcode.isDark(row, col) ) {
+            darkCount += 1;
+          }
+        }
+      }
+
+      var ratio = Math.abs(100 * darkCount / moduleCount / moduleCount - 50) / 5;
+      lostPoint += ratio * 10;
+
+      return lostPoint;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // QRMath
+  //---------------------------------------------------------------------
+
+  var QRMath = function() {
+
+    var EXP_TABLE = new Array(256);
+    var LOG_TABLE = new Array(256);
+
+    // initialize tables
+    for (var i = 0; i < 8; i += 1) {
+      EXP_TABLE[i] = 1 << i;
+    }
+    for (var i = 8; i < 256; i += 1) {
+      EXP_TABLE[i] = EXP_TABLE[i - 4]
+        ^ EXP_TABLE[i - 5]
+        ^ EXP_TABLE[i - 6]
+        ^ EXP_TABLE[i - 8];
+    }
+    for (var i = 0; i < 255; i += 1) {
+      LOG_TABLE[EXP_TABLE[i] ] = i;
+    }
+
+    var _this = {};
+
+    _this.glog = function(n) {
+
+      if (n < 1) {
+        throw 'glog(' + n + ')';
+      }
+
+      return LOG_TABLE[n];
+    };
+
+    _this.gexp = function(n) {
+
+      while (n < 0) {
+        n += 255;
+      }
+
+      while (n >= 256) {
+        n -= 255;
+      }
+
+      return EXP_TABLE[n];
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrPolynomial
+  //---------------------------------------------------------------------
+
+  function qrPolynomial(num, shift) {
+
+    if (typeof num.length == 'undefined') {
+      throw num.length + '/' + shift;
+    }
+
+    var _num = function() {
+      var offset = 0;
+      while (offset < num.length && num[offset] == 0) {
+        offset += 1;
+      }
+      var _num = new Array(num.length - offset + shift);
+      for (var i = 0; i < num.length - offset; i += 1) {
+        _num[i] = num[i + offset];
+      }
+      return _num;
+    }();
+
+    var _this = {};
+
+    _this.getAt = function(index) {
+      return _num[index];
+    };
+
+    _this.getLength = function() {
+      return _num.length;
+    };
+
+    _this.multiply = function(e) {
+
+      var num = new Array(_this.getLength() + e.getLength() - 1);
+
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        for (var j = 0; j < e.getLength(); j += 1) {
+          num[i + j] ^= QRMath.gexp(QRMath.glog(_this.getAt(i) ) + QRMath.glog(e.getAt(j) ) );
+        }
+      }
+
+      return qrPolynomial(num, 0);
+    };
+
+    _this.mod = function(e) {
+
+      if (_this.getLength() - e.getLength() < 0) {
+        return _this;
+      }
+
+      var ratio = QRMath.glog(_this.getAt(0) ) - QRMath.glog(e.getAt(0) );
+
+      var num = new Array(_this.getLength() );
+      for (var i = 0; i < _this.getLength(); i += 1) {
+        num[i] = _this.getAt(i);
+      }
+
+      for (var i = 0; i < e.getLength(); i += 1) {
+        num[i] ^= QRMath.gexp(QRMath.glog(e.getAt(i) ) + ratio);
+      }
+
+      // recursive call
+      return qrPolynomial(num, 0).mod(e);
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // QRRSBlock
+  //---------------------------------------------------------------------
+
+  var QRRSBlock = function() {
+
+    var RS_BLOCK_TABLE = [
+
+      // L
+      // M
+      // Q
+      // H
+
+      // 1
+      [1, 26, 19],
+      [1, 26, 16],
+      [1, 26, 13],
+      [1, 26, 9],
+
+      // 2
+      [1, 44, 34],
+      [1, 44, 28],
+      [1, 44, 22],
+      [1, 44, 16],
+
+      // 3
+      [1, 70, 55],
+      [1, 70, 44],
+      [2, 35, 17],
+      [2, 35, 13],
+
+      // 4
+      [1, 100, 80],
+      [2, 50, 32],
+      [2, 50, 24],
+      [4, 25, 9],
+
+      // 5
+      [1, 134, 108],
+      [2, 67, 43],
+      [2, 33, 15, 2, 34, 16],
+      [2, 33, 11, 2, 34, 12],
+
+      // 6
+      [2, 86, 68],
+      [4, 43, 27],
+      [4, 43, 19],
+      [4, 43, 15],
+
+      // 7
+      [2, 98, 78],
+      [4, 49, 31],
+      [2, 32, 14, 4, 33, 15],
+      [4, 39, 13, 1, 40, 14],
+
+      // 8
+      [2, 121, 97],
+      [2, 60, 38, 2, 61, 39],
+      [4, 40, 18, 2, 41, 19],
+      [4, 40, 14, 2, 41, 15],
+
+      // 9
+      [2, 146, 116],
+      [3, 58, 36, 2, 59, 37],
+      [4, 36, 16, 4, 37, 17],
+      [4, 36, 12, 4, 37, 13],
+
+      // 10
+      [2, 86, 68, 2, 87, 69],
+      [4, 69, 43, 1, 70, 44],
+      [6, 43, 19, 2, 44, 20],
+      [6, 43, 15, 2, 44, 16],
+
+      // 11
+      [4, 101, 81],
+      [1, 80, 50, 4, 81, 51],
+      [4, 50, 22, 4, 51, 23],
+      [3, 36, 12, 8, 37, 13],
+
+      // 12
+      [2, 116, 92, 2, 117, 93],
+      [6, 58, 36, 2, 59, 37],
+      [4, 46, 20, 6, 47, 21],
+      [7, 42, 14, 4, 43, 15],
+
+      // 13
+      [4, 133, 107],
+      [8, 59, 37, 1, 60, 38],
+      [8, 44, 20, 4, 45, 21],
+      [12, 33, 11, 4, 34, 12],
+
+      // 14
+      [3, 145, 115, 1, 146, 116],
+      [4, 64, 40, 5, 65, 41],
+      [11, 36, 16, 5, 37, 17],
+      [11, 36, 12, 5, 37, 13],
+
+      // 15
+      [5, 109, 87, 1, 110, 88],
+      [5, 65, 41, 5, 66, 42],
+      [5, 54, 24, 7, 55, 25],
+      [11, 36, 12, 7, 37, 13],
+
+      // 16
+      [5, 122, 98, 1, 123, 99],
+      [7, 73, 45, 3, 74, 46],
+      [15, 43, 19, 2, 44, 20],
+      [3, 45, 15, 13, 46, 16],
+
+      // 17
+      [1, 135, 107, 5, 136, 108],
+      [10, 74, 46, 1, 75, 47],
+      [1, 50, 22, 15, 51, 23],
+      [2, 42, 14, 17, 43, 15],
+
+      // 18
+      [5, 150, 120, 1, 151, 121],
+      [9, 69, 43, 4, 70, 44],
+      [17, 50, 22, 1, 51, 23],
+      [2, 42, 14, 19, 43, 15],
+
+      // 19
+      [3, 141, 113, 4, 142, 114],
+      [3, 70, 44, 11, 71, 45],
+      [17, 47, 21, 4, 48, 22],
+      [9, 39, 13, 16, 40, 14],
+
+      // 20
+      [3, 135, 107, 5, 136, 108],
+      [3, 67, 41, 13, 68, 42],
+      [15, 54, 24, 5, 55, 25],
+      [15, 43, 15, 10, 44, 16],
+
+      // 21
+      [4, 144, 116, 4, 145, 117],
+      [17, 68, 42],
+      [17, 50, 22, 6, 51, 23],
+      [19, 46, 16, 6, 47, 17],
+
+      // 22
+      [2, 139, 111, 7, 140, 112],
+      [17, 74, 46],
+      [7, 54, 24, 16, 55, 25],
+      [34, 37, 13],
+
+      // 23
+      [4, 151, 121, 5, 152, 122],
+      [4, 75, 47, 14, 76, 48],
+      [11, 54, 24, 14, 55, 25],
+      [16, 45, 15, 14, 46, 16],
+
+      // 24
+      [6, 147, 117, 4, 148, 118],
+      [6, 73, 45, 14, 74, 46],
+      [11, 54, 24, 16, 55, 25],
+      [30, 46, 16, 2, 47, 17],
+
+      // 25
+      [8, 132, 106, 4, 133, 107],
+      [8, 75, 47, 13, 76, 48],
+      [7, 54, 24, 22, 55, 25],
+      [22, 45, 15, 13, 46, 16],
+
+      // 26
+      [10, 142, 114, 2, 143, 115],
+      [19, 74, 46, 4, 75, 47],
+      [28, 50, 22, 6, 51, 23],
+      [33, 46, 16, 4, 47, 17],
+
+      // 27
+      [8, 152, 122, 4, 153, 123],
+      [22, 73, 45, 3, 74, 46],
+      [8, 53, 23, 26, 54, 24],
+      [12, 45, 15, 28, 46, 16],
+
+      // 28
+      [3, 147, 117, 10, 148, 118],
+      [3, 73, 45, 23, 74, 46],
+      [4, 54, 24, 31, 55, 25],
+      [11, 45, 15, 31, 46, 16],
+
+      // 29
+      [7, 146, 116, 7, 147, 117],
+      [21, 73, 45, 7, 74, 46],
+      [1, 53, 23, 37, 54, 24],
+      [19, 45, 15, 26, 46, 16],
+
+      // 30
+      [5, 145, 115, 10, 146, 116],
+      [19, 75, 47, 10, 76, 48],
+      [15, 54, 24, 25, 55, 25],
+      [23, 45, 15, 25, 46, 16],
+
+      // 31
+      [13, 145, 115, 3, 146, 116],
+      [2, 74, 46, 29, 75, 47],
+      [42, 54, 24, 1, 55, 25],
+      [23, 45, 15, 28, 46, 16],
+
+      // 32
+      [17, 145, 115],
+      [10, 74, 46, 23, 75, 47],
+      [10, 54, 24, 35, 55, 25],
+      [19, 45, 15, 35, 46, 16],
+
+      // 33
+      [17, 145, 115, 1, 146, 116],
+      [14, 74, 46, 21, 75, 47],
+      [29, 54, 24, 19, 55, 25],
+      [11, 45, 15, 46, 46, 16],
+
+      // 34
+      [13, 145, 115, 6, 146, 116],
+      [14, 74, 46, 23, 75, 47],
+      [44, 54, 24, 7, 55, 25],
+      [59, 46, 16, 1, 47, 17],
+
+      // 35
+      [12, 151, 121, 7, 152, 122],
+      [12, 75, 47, 26, 76, 48],
+      [39, 54, 24, 14, 55, 25],
+      [22, 45, 15, 41, 46, 16],
+
+      // 36
+      [6, 151, 121, 14, 152, 122],
+      [6, 75, 47, 34, 76, 48],
+      [46, 54, 24, 10, 55, 25],
+      [2, 45, 15, 64, 46, 16],
+
+      // 37
+      [17, 152, 122, 4, 153, 123],
+      [29, 74, 46, 14, 75, 47],
+      [49, 54, 24, 10, 55, 25],
+      [24, 45, 15, 46, 46, 16],
+
+      // 38
+      [4, 152, 122, 18, 153, 123],
+      [13, 74, 46, 32, 75, 47],
+      [48, 54, 24, 14, 55, 25],
+      [42, 45, 15, 32, 46, 16],
+
+      // 39
+      [20, 147, 117, 4, 148, 118],
+      [40, 75, 47, 7, 76, 48],
+      [43, 54, 24, 22, 55, 25],
+      [10, 45, 15, 67, 46, 16],
+
+      // 40
+      [19, 148, 118, 6, 149, 119],
+      [18, 75, 47, 31, 76, 48],
+      [34, 54, 24, 34, 55, 25],
+      [20, 45, 15, 61, 46, 16]
+    ];
+
+    var qrRSBlock = function(totalCount, dataCount) {
+      var _this = {};
+      _this.totalCount = totalCount;
+      _this.dataCount = dataCount;
+      return _this;
+    };
+
+    var _this = {};
+
+    var getRsBlockTable = function(typeNumber, errorCorrectionLevel) {
+
+      switch(errorCorrectionLevel) {
+      case QRErrorCorrectionLevel.L :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 0];
+      case QRErrorCorrectionLevel.M :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 1];
+      case QRErrorCorrectionLevel.Q :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 2];
+      case QRErrorCorrectionLevel.H :
+        return RS_BLOCK_TABLE[(typeNumber - 1) * 4 + 3];
+      default :
+        return undefined;
+      }
+    };
+
+    _this.getRSBlocks = function(typeNumber, errorCorrectionLevel) {
+
+      var rsBlock = getRsBlockTable(typeNumber, errorCorrectionLevel);
+
+      if (typeof rsBlock == 'undefined') {
+        throw 'bad rs block @ typeNumber:' + typeNumber +
+            '/errorCorrectionLevel:' + errorCorrectionLevel;
+      }
+
+      var length = rsBlock.length / 3;
+
+      var list = [];
+
+      for (var i = 0; i < length; i += 1) {
+
+        var count = rsBlock[i * 3 + 0];
+        var totalCount = rsBlock[i * 3 + 1];
+        var dataCount = rsBlock[i * 3 + 2];
+
+        for (var j = 0; j < count; j += 1) {
+          list.push(qrRSBlock(totalCount, dataCount) );
+        }
+      }
+
+      return list;
+    };
+
+    return _this;
+  }();
+
+  //---------------------------------------------------------------------
+  // qrBitBuffer
+  //---------------------------------------------------------------------
+
+  var qrBitBuffer = function() {
+
+    var _buffer = [];
+    var _length = 0;
+
+    var _this = {};
+
+    _this.getBuffer = function() {
+      return _buffer;
+    };
+
+    _this.getAt = function(index) {
+      var bufIndex = Math.floor(index / 8);
+      return ( (_buffer[bufIndex] >>> (7 - index % 8) ) & 1) == 1;
+    };
+
+    _this.put = function(num, length) {
+      for (var i = 0; i < length; i += 1) {
+        _this.putBit( ( (num >>> (length - i - 1) ) & 1) == 1);
+      }
+    };
+
+    _this.getLengthInBits = function() {
+      return _length;
+    };
+
+    _this.putBit = function(bit) {
+
+      var bufIndex = Math.floor(_length / 8);
+      if (_buffer.length <= bufIndex) {
+        _buffer.push(0);
+      }
+
+      if (bit) {
+        _buffer[bufIndex] |= (0x80 >>> (_length % 8) );
+      }
+
+      _length += 1;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrNumber
+  //---------------------------------------------------------------------
+
+  var qrNumber = function(data) {
+
+    var _mode = QRMode.MODE_NUMBER;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _data;
+
+      var i = 0;
+
+      while (i + 2 < data.length) {
+        buffer.put(strToNum(data.substring(i, i + 3) ), 10);
+        i += 3;
+      }
+
+      if (i < data.length) {
+        if (data.length - i == 1) {
+          buffer.put(strToNum(data.substring(i, i + 1) ), 4);
+        } else if (data.length - i == 2) {
+          buffer.put(strToNum(data.substring(i, i + 2) ), 7);
+        }
+      }
+    };
+
+    var strToNum = function(s) {
+      var num = 0;
+      for (var i = 0; i < s.length; i += 1) {
+        num = num * 10 + chatToNum(s.charAt(i) );
+      }
+      return num;
+    };
+
+    var chatToNum = function(c) {
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      }
+      throw 'illegal char :' + c;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrAlphaNum
+  //---------------------------------------------------------------------
+
+  var qrAlphaNum = function(data) {
+
+    var _mode = QRMode.MODE_ALPHA_NUM;
+    var _data = data;
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _data.length;
+    };
+
+    _this.write = function(buffer) {
+
+      var s = _data;
+
+      var i = 0;
+
+      while (i + 1 < s.length) {
+        buffer.put(
+          getCode(s.charAt(i) ) * 45 +
+          getCode(s.charAt(i + 1) ), 11);
+        i += 2;
+      }
+
+      if (i < s.length) {
+        buffer.put(getCode(s.charAt(i) ), 6);
+      }
+    };
+
+    var getCode = function(c) {
+
+      if ('0' <= c && c <= '9') {
+        return c.charCodeAt(0) - '0'.charCodeAt(0);
+      } else if ('A' <= c && c <= 'Z') {
+        return c.charCodeAt(0) - 'A'.charCodeAt(0) + 10;
+      } else {
+        switch (c) {
+        case ' ' : return 36;
+        case '$' : return 37;
+        case '%' : return 38;
+        case '*' : return 39;
+        case '+' : return 40;
+        case '-' : return 41;
+        case '.' : return 42;
+        case '/' : return 43;
+        case ':' : return 44;
+        default :
+          throw 'illegal char :' + c;
+        }
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qr8BitByte
+  //---------------------------------------------------------------------
+
+  var qr8BitByte = function(data) {
+
+    var _mode = QRMode.MODE_8BIT_BYTE;
+    var _data = data;
+    var _bytes = qrcode.stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return _bytes.length;
+    };
+
+    _this.write = function(buffer) {
+      for (var i = 0; i < _bytes.length; i += 1) {
+        buffer.put(_bytes[i], 8);
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // qrKanji
+  //---------------------------------------------------------------------
+
+  var qrKanji = function(data) {
+
+    var _mode = QRMode.MODE_KANJI;
+    var _data = data;
+
+    var stringToBytes = qrcode.stringToBytesFuncs['SJIS'];
+    if (!stringToBytes) {
+      throw 'sjis not supported.';
+    }
+    !function(c, code) {
+      // self test for sjis support.
+      var test = stringToBytes(c);
+      if (test.length != 2 || ( (test[0] << 8) | test[1]) != code) {
+        throw 'sjis not supported.';
+      }
+    }('\u53cb', 0x9746);
+
+    var _bytes = stringToBytes(data);
+
+    var _this = {};
+
+    _this.getMode = function() {
+      return _mode;
+    };
+
+    _this.getLength = function(buffer) {
+      return ~~(_bytes.length / 2);
+    };
+
+    _this.write = function(buffer) {
+
+      var data = _bytes;
+
+      var i = 0;
+
+      while (i + 1 < data.length) {
+
+        var c = ( (0xff & data[i]) << 8) | (0xff & data[i + 1]);
+
+        if (0x8140 <= c && c <= 0x9FFC) {
+          c -= 0x8140;
+        } else if (0xE040 <= c && c <= 0xEBBF) {
+          c -= 0xC140;
+        } else {
+          throw 'illegal char at ' + (i + 1) + '/' + c;
+        }
+
+        c = ( (c >>> 8) & 0xff) * 0xC0 + (c & 0xff);
+
+        buffer.put(c, 13);
+
+        i += 2;
+      }
+
+      if (i < data.length) {
+        throw 'illegal char at ' + (i + 1);
+      }
+    };
+
+    return _this;
+  };
+
+  //=====================================================================
+  // GIF Support etc.
+  //
+
+  //---------------------------------------------------------------------
+  // byteArrayOutputStream
+  //---------------------------------------------------------------------
+
+  var byteArrayOutputStream = function() {
+
+    var _bytes = [];
+
+    var _this = {};
+
+    _this.writeByte = function(b) {
+      _bytes.push(b & 0xff);
+    };
+
+    _this.writeShort = function(i) {
+      _this.writeByte(i);
+      _this.writeByte(i >>> 8);
+    };
+
+    _this.writeBytes = function(b, off, len) {
+      off = off || 0;
+      len = len || b.length;
+      for (var i = 0; i < len; i += 1) {
+        _this.writeByte(b[i + off]);
+      }
+    };
+
+    _this.writeString = function(s) {
+      for (var i = 0; i < s.length; i += 1) {
+        _this.writeByte(s.charCodeAt(i) );
+      }
+    };
+
+    _this.toByteArray = function() {
+      return _bytes;
+    };
+
+    _this.toString = function() {
+      var s = '';
+      s += '[';
+      for (var i = 0; i < _bytes.length; i += 1) {
+        if (i > 0) {
+          s += ',';
+        }
+        s += _bytes[i];
+      }
+      s += ']';
+      return s;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64EncodeOutputStream
+  //---------------------------------------------------------------------
+
+  var base64EncodeOutputStream = function() {
+
+    var _buffer = 0;
+    var _buflen = 0;
+    var _length = 0;
+    var _base64 = '';
+
+    var _this = {};
+
+    var writeEncoded = function(b) {
+      _base64 += String.fromCharCode(encode(b & 0x3f) );
+    };
+
+    var encode = function(n) {
+      if (n < 0) {
+        // error.
+      } else if (n < 26) {
+        return 0x41 + n;
+      } else if (n < 52) {
+        return 0x61 + (n - 26);
+      } else if (n < 62) {
+        return 0x30 + (n - 52);
+      } else if (n == 62) {
+        return 0x2b;
+      } else if (n == 63) {
+        return 0x2f;
+      }
+      throw 'n:' + n;
+    };
+
+    _this.writeByte = function(n) {
+
+      _buffer = (_buffer << 8) | (n & 0xff);
+      _buflen += 8;
+      _length += 1;
+
+      while (_buflen >= 6) {
+        writeEncoded(_buffer >>> (_buflen - 6) );
+        _buflen -= 6;
+      }
+    };
+
+    _this.flush = function() {
+
+      if (_buflen > 0) {
+        writeEncoded(_buffer << (6 - _buflen) );
+        _buffer = 0;
+        _buflen = 0;
+      }
+
+      if (_length % 3 != 0) {
+        // padding
+        var padlen = 3 - _length % 3;
+        for (var i = 0; i < padlen; i += 1) {
+          _base64 += '=';
+        }
+      }
+    };
+
+    _this.toString = function() {
+      return _base64;
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // base64DecodeInputStream
+  //---------------------------------------------------------------------
+
+  var base64DecodeInputStream = function(str) {
+
+    var _str = str;
+    var _pos = 0;
+    var _buffer = 0;
+    var _buflen = 0;
+
+    var _this = {};
+
+    _this.read = function() {
+
+      while (_buflen < 8) {
+
+        if (_pos >= _str.length) {
+          if (_buflen == 0) {
+            return -1;
+          }
+          throw 'unexpected end of file./' + _buflen;
+        }
+
+        var c = _str.charAt(_pos);
+        _pos += 1;
+
+        if (c == '=') {
+          _buflen = 0;
+          return -1;
+        } else if (c.match(/^\s$/) ) {
+          // ignore if whitespace.
+          continue;
+        }
+
+        _buffer = (_buffer << 6) | decode(c.charCodeAt(0) );
+        _buflen += 6;
+      }
+
+      var n = (_buffer >>> (_buflen - 8) ) & 0xff;
+      _buflen -= 8;
+      return n;
+    };
+
+    var decode = function(c) {
+      if (0x41 <= c && c <= 0x5a) {
+        return c - 0x41;
+      } else if (0x61 <= c && c <= 0x7a) {
+        return c - 0x61 + 26;
+      } else if (0x30 <= c && c <= 0x39) {
+        return c - 0x30 + 52;
+      } else if (c == 0x2b) {
+        return 62;
+      } else if (c == 0x2f) {
+        return 63;
+      } else {
+        throw 'c:' + c;
+      }
+    };
+
+    return _this;
+  };
+
+  //---------------------------------------------------------------------
+  // gifImage (B/W)
+  //---------------------------------------------------------------------
+
+  var gifImage = function(width, height) {
+
+    var _width = width;
+    var _height = height;
+    var _data = new Array(width * height);
+
+    var _this = {};
+
+    _this.setPixel = function(x, y, pixel) {
+      _data[y * _width + x] = pixel;
+    };
+
+    _this.write = function(out) {
+
+      //---------------------------------
+      // GIF Signature
+
+      out.writeString('GIF87a');
+
+      //---------------------------------
+      // Screen Descriptor
+
+      out.writeShort(_width);
+      out.writeShort(_height);
+
+      out.writeByte(0x80); // 2bit
+      out.writeByte(0);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Global Color Map
+
+      // black
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+      out.writeByte(0x00);
+
+      // white
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+      out.writeByte(0xff);
+
+      //---------------------------------
+      // Image Descriptor
+
+      out.writeString(',');
+      out.writeShort(0);
+      out.writeShort(0);
+      out.writeShort(_width);
+      out.writeShort(_height);
+      out.writeByte(0);
+
+      //---------------------------------
+      // Local Color Map
+
+      //---------------------------------
+      // Raster Data
+
+      var lzwMinCodeSize = 2;
+      var raster = getLZWRaster(lzwMinCodeSize);
+
+      out.writeByte(lzwMinCodeSize);
+
+      var offset = 0;
+
+      while (raster.length - offset > 255) {
+        out.writeByte(255);
+        out.writeBytes(raster, offset, 255);
+        offset += 255;
+      }
+
+      out.writeByte(raster.length - offset);
+      out.writeBytes(raster, offset, raster.length - offset);
+      out.writeByte(0x00);
+
+      //---------------------------------
+      // GIF Terminator
+      out.writeString(';');
+    };
+
+    var bitOutputStream = function(out) {
+
+      var _out = out;
+      var _bitLength = 0;
+      var _bitBuffer = 0;
+
+      var _this = {};
+
+      _this.write = function(data, length) {
+
+        if ( (data >>> length) != 0) {
+          throw 'length over';
+        }
+
+        while (_bitLength + length >= 8) {
+          _out.writeByte(0xff & ( (data << _bitLength) | _bitBuffer) );
+          length -= (8 - _bitLength);
+          data >>>= (8 - _bitLength);
+          _bitBuffer = 0;
+          _bitLength = 0;
+        }
+
+        _bitBuffer = (data << _bitLength) | _bitBuffer;
+        _bitLength = _bitLength + length;
+      };
+
+      _this.flush = function() {
+        if (_bitLength > 0) {
+          _out.writeByte(_bitBuffer);
+        }
+      };
+
+      return _this;
+    };
+
+    var getLZWRaster = function(lzwMinCodeSize) {
+
+      var clearCode = 1 << lzwMinCodeSize;
+      var endCode = (1 << lzwMinCodeSize) + 1;
+      var bitLength = lzwMinCodeSize + 1;
+
+      // Setup LZWTable
+      var table = lzwTable();
+
+      for (var i = 0; i < clearCode; i += 1) {
+        table.add(String.fromCharCode(i) );
+      }
+      table.add(String.fromCharCode(clearCode) );
+      table.add(String.fromCharCode(endCode) );
+
+      var byteOut = byteArrayOutputStream();
+      var bitOut = bitOutputStream(byteOut);
+
+      // clear code
+      bitOut.write(clearCode, bitLength);
+
+      var dataIndex = 0;
+
+      var s = String.fromCharCode(_data[dataIndex]);
+      dataIndex += 1;
+
+      while (dataIndex < _data.length) {
+
+        var c = String.fromCharCode(_data[dataIndex]);
+        dataIndex += 1;
+
+        if (table.contains(s + c) ) {
+
+          s = s + c;
+
+        } else {
+
+          bitOut.write(table.indexOf(s), bitLength);
+
+          if (table.size() < 0xfff) {
+
+            if (table.size() == (1 << bitLength) ) {
+              bitLength += 1;
+            }
+
+            table.add(s + c);
+          }
+
+          s = c;
+        }
+      }
+
+      bitOut.write(table.indexOf(s), bitLength);
+
+      // end code
+      bitOut.write(endCode, bitLength);
+
+      bitOut.flush();
+
+      return byteOut.toByteArray();
+    };
+
+    var lzwTable = function() {
+
+      var _map = {};
+      var _size = 0;
+
+      var _this = {};
+
+      _this.add = function(key) {
+        if (_this.contains(key) ) {
+          throw 'dup key:' + key;
+        }
+        _map[key] = _size;
+        _size += 1;
+      };
+
+      _this.size = function() {
+        return _size;
+      };
+
+      _this.indexOf = function(key) {
+        return _map[key];
+      };
+
+      _this.contains = function(key) {
+        return typeof _map[key] != 'undefined';
+      };
+
+      return _this;
+    };
+
+    return _this;
+  };
+
+  var createDataURL = function(width, height, getPixel) {
+    var gif = gifImage(width, height);
+    for (var y = 0; y < height; y += 1) {
+      for (var x = 0; x < width; x += 1) {
+        gif.setPixel(x, y, getPixel(x, y) );
+      }
+    }
+
+    var b = byteArrayOutputStream();
+    gif.write(b);
+
+    var base64 = base64EncodeOutputStream();
+    var bytes = b.toByteArray();
+    for (var i = 0; i < bytes.length; i += 1) {
+      base64.writeByte(bytes[i]);
+    }
+    base64.flush();
+
+    return 'data:image/gif;base64,' + base64;
+  };
+
+  //---------------------------------------------------------------------
+  // returns qrcode function.
+
+  return qrcode;
+}();
+
+// multibyte support
+!function() {
+
+  qrcode.stringToBytesFuncs['UTF-8'] = function(s) {
+    // http://stackoverflow.com/questions/18729405/how-to-convert-utf8-string-to-byte-array
+    function toUTF8Array(str) {
+      var utf8 = [];
+      for (var i=0; i < str.length; i++) {
+        var charcode = str.charCodeAt(i);
+        if (charcode < 0x80) utf8.push(charcode);
+        else if (charcode < 0x800) {
+          utf8.push(0xc0 | (charcode >> 6),
+              0x80 | (charcode & 0x3f));
+        }
+        else if (charcode < 0xd800 || charcode >= 0xe000) {
+          utf8.push(0xe0 | (charcode >> 12),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+        // surrogate pair
+        else {
+          i++;
+          // UTF-16 encodes 0x10000-0x10FFFF by
+          // subtracting 0x10000 and splitting the
+          // 20 bits of 0x0-0xFFFFF into two halves
+          charcode = 0x10000 + (((charcode & 0x3ff)<<10)
+            | (str.charCodeAt(i) & 0x3ff));
+          utf8.push(0xf0 | (charcode >>18),
+              0x80 | ((charcode>>12) & 0x3f),
+              0x80 | ((charcode>>6) & 0x3f),
+              0x80 | (charcode & 0x3f));
+        }
+      }
+      return utf8;
+    }
+    return toUTF8Array(s);
+  };
+
+}();
+
+
+</script>
+<script>
+/* ============ Data ============ */
+const KEY='campuser.v2';
+const COLORS=['#2f7d5b','#2b64a8','#c0563b','#7b4fa8','#d98b1c','#1f8a9e','#b4336b','#5a6b3c'];
+const EMOJI_KEYWORDS=[
+  ['⚽',['soccer','football','futbol','kick']],['🏀',['basketball','hoops','dunk']],['⚾',['baseball','softball','little league']],['🏈',['gridiron','flag football']],['🎾',['tennis','pickleball','racquet']],['🏐',['volleyball']],['🏒',['hockey','ice']],['⛳',['golf']],['🥋',['karate','judo','taekwondo','martial','jiu','dojo']],['🤸',['gymnastic','tumbl','cheer','acro']],['🏃',['track','running','cross country','sprint','marathon']],['🚴',['bike','biking','cycling','mtb','mountain bike']],['🛹',['skate','skateboard']],['⛷️',['ski','snow','snowboard','winter']],['🏊',['swim','pool','aquatic','dive','diving']],['🏄',['surf','board']],['🛶',['canoe','kayak','paddle','row']],['⛵',['sail','boat','regatta']],['🎣',['fish','angling']],['🌊',['lake','ocean','beach','sea','water','river']],
+  ['🎨',['art','paint','draw','sketch','craft','design','pottery','sculpt','creative']],['🎭',['theater','theatre','drama','acting','improv','musical theater','stage']],['🎬',['film','movie','video','cinema','animation']],['📷',['photo','camera']],['🩰',['dance','ballet','hip hop','jazz']],['🎸',['guitar','rock','band']],['🎹',['piano','keyboard']],['🎵',['music','choir','sing','song','orchestra','symphony','vocal']],['🥁',['drum','percussion']],['✍️',['writing','writer','poetry','journal','author','story']],
+  ['💻',['code','coding','computer','program','tech','software','web','hack','app','minecraft','roblox','digital','game dev']],['🤖',['robot','robotic','ai','lego','engineering','mecha']],['🔬',['science','stem','steam','lab','chem','bio','physics','experiment']],['🚀',['space','rocket','astro','nasa','planet']],['🔭',['star','telescope','astronomy']],['🧮',['math','number','algebra','geometry']],['📚',['read','book','literacy','study','academic','tutoring','prep','school']],['🗣️',['debate','speech','language','spanish','french','mandarin','leadership','model un']],['🍳',['cook','chef','culinary','bake','baking','kitchen','food']],['🌱',['garden','farm','plant','eco','nature','environment','sustain']],['🐎',['horse','equestrian','pony','ranch','riding','rodeo']],['🐾',['animal','zoo','pet','vet','wildlife','dog','cat']],['🔥',['fire','campfire','bonfire','survival','bushcraft','wilderness']],['🧗',['climb','rock','boulder','ropes','adventure','expedition']],['🥾',['hike','hiking','trail','backpack','trek']],['🌲',['forest','pine','wood','tree','ridge','mountain','sierra','redwood','outdoor']],['⛺',['overnight','sleepaway','backcountry','tent']],['🧘',['yoga','mindful','wellness','meditation']],['🎓',['college','university','career','scholar']],['🧒',['kids','little','junior','preschool','tots','mini']],['🎉',['party','fun','festival','celebration','birthday']],['🏕️',['camp']]
+];
+const GENERIC_KW=new Set(['adventure','expedition','outdoor','kids','little','junior','preschool','tots','mini','camp','fun','school','study','academic','prep','tech','app','digital','board','water','ice','rock','stage','band','design','creative','nature','wilderness','survival']);
+const EMOJIS=[...new Set(EMOJI_KEYWORDS.map(x=>x[0]))];
+function suggestEmoji(name,type){
+  const n=' '+(name||'').toLowerCase()+' ';
+  let best='🏕️',bestScore=0;
+  for(const [e,kws] of EMOJI_KEYWORDS){for(const k of kws){const i=n.indexOf(k);if(i>-1){const wordStart=/\W/.test(n[i-1]||' ');const score=(GENERIC_KW.has(k)?1:20)+k.length+(wordStart?3:0);if(score>bestScore){best=e;bestScore=score}}}}
+  if(bestScore>0)return best;
+  const t=(type||'').toLowerCase();
+  if(t.includes('sport'))return'⚽';if(t.includes('art'))return'🎨';if(t.includes('stem'))return'🔬';if(t.includes('music'))return'🎵';if(t.includes('adventure'))return'🧗';if(t.includes('wilderness'))return'🌲';
+  return'🏕️';
+}
+const TYPES=['Summer Camp','Day Camp','Sports Camp','Arts Camp','STEM Camp','Adventure Camp','Music Camp','Wilderness Camp','Other'];
+const STATUSES=['Registered','Waitlisted','Checked-in','Cancelled'];
+const uid=()=>Math.random().toString(36).slice(2,10);
+const today=()=>new Date().toISOString().slice(0,10);
+const addDays=(d,n)=>{const x=new Date(d+'T00:00:00');x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)};
+
+function seed(){return {camps:[]}}
+/* --- Memory: localStorage -> IndexedDB -> in-memory, with autosave & recovery --- */
+const BACKUP_KEY=KEY+'.backup', DRAFT_KEY=KEY+'.draft';
+const mem={};
+const store={
+  get(k){try{const v=localStorage.getItem(k);if(v!=null)return v}catch(e){}return mem[k]??null},
+  set(k,v){mem[k]=v;try{localStorage.setItem(k,v)}catch(e){}idb.set(k,v)},
+  del(k){delete mem[k];try{localStorage.removeItem(k)}catch(e){}idb.set(k,null)}
+};
+const idb={
+  open(){return new Promise(res=>{try{const r=indexedDB.open('campuser',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)}catch(e){res(null)}})},
+  async set(k,v){const db=await this.open();if(!db)return;try{const tx=db.transaction('kv','readwrite');v==null?tx.objectStore('kv').delete(k):tx.objectStore('kv').put(v,k)}catch(e){}},
+  async get(k){const db=await this.open();if(!db)return null;return new Promise(res=>{try{const r=db.transaction('kv').objectStore('kv').get(k);r.onsuccess=()=>res(r.result??null);r.onerror=()=>res(null)}catch(e){res(null)}})}
+};
+function parse(v){try{const d=JSON.parse(v);if(d&&Array.isArray(d.camps))return d}catch(e){}return null}
+/* --- 16-digit access codes --- */
+const ACCESS_KEY='campuser.access';   // camps you've unlocked — permanent, not tied to data version
+const CODES_KEY='campuser.codes';     // permanent registry: code -> {id,name,emoji}
+function genCode(existing=new Set()){let code;do{const a=new Uint32Array(4);(window.crypto||{}).getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*4294967296);code=Array.from(a,n=>String(n%10000).padStart(4,'0')).join('')}while(existing.has(code)||code[0]==='0');return code}
+function allCodes(d=DB){return new Set([...d.camps,...(d.trash||[])].map(c=>c.code).filter(Boolean))}
+const fmtCode=c=>String(c||'').replace(/\D/g,'').slice(0,16).replace(/(\d{4})(?=\d)/g,'$1-');
+const cleanCode=c=>String(c||'').replace(/\D/g,'');
+let ACCESS=new Set();try{ACCESS=new Set(JSON.parse(store.get(ACCESS_KEY)||'[]'))}catch(e){}
+function saveAccess(){store.set(ACCESS_KEY,JSON.stringify([...ACCESS]))}
+let CODES={};try{CODES=JSON.parse(store.get(CODES_KEY)||'{}')||{}}catch(e){}
+function rememberCode(c){if(!c||!c.code)return;CODES[c.code]={id:c.id,name:c.name,emoji:c.emoji};store.set(CODES_KEY,JSON.stringify(CODES))}
+function rememberAllCodes(){[...DB.camps,...(DB.trash||[])].forEach(rememberCode)}
+function campByCode(code){let c=DB.camps.find(x=>x.code===code);if(c)return c;const r=CODES[code];if(r){c=DB.camps.find(x=>x.id===r.id);if(c){c.code=code;return c}}return null}
+const groupOf=c=>c&&c.groupId?DB.groups.find(g=>g.id===c.groupId):null;
+const groupCamps=g=>DB.camps.filter(c=>c.groupId===g.id);
+const myGroupCamps=g=>groupCamps(g).filter(hasAccess);
+const GROUP_EMOJIS=['🏢','🏫','⛪','🏛️','🌳','🏕️','🎪','🏟️','🎓','🤝','🧭','⭐'];
+function campFull(c){return enrolled(c)>=c.capacity&&waitFull(c)}
+function joinURL(c){return location.origin.startsWith('http')?location.origin+location.pathname+'#join='+c.code:'#join='+c.code}
+function isHosted(){return location.protocol.startsWith('http')&&!/^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname)}
+function waitlistQueue(c){return c.campers.filter(p=>p.status==='Waitlisted').sort((a,b)=>(a.waitlistedAt||'').localeCompare(b.waitlistedAt||''))}
+function waitPos(c,p){return waitlistQueue(c).findIndex(x=>x.id===p.id)+1}
+function promoteWaitlist(c){let n=0;while(enrolled(c)<c.capacity){const q=waitlistQueue(c);if(!q.length)break;q[0].status='Registered';q[0].promotedAt=new Date().toISOString();delete q[0].waitlistedAt;n++}return n}
+function stampWaitlist(p){if(p.status==='Waitlisted'){p.waitlistedAt||(p.waitlistedAt=new Date().toISOString())}else delete p.waitlistedAt}
+function makeQR(text,cell=6,margin=2){const qr=qrcode(0,'M');qr.addData(text);qr.make();const n=qr.getModuleCount(),size=(n+margin*2)*cell;let rects='';for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(qr.isDark(r,col))rects+=`<rect x="${(col+margin)*cell}" y="${(r+margin)*cell}" width="${cell}" height="${cell}"/>`;return{svg:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><g fill="#1f2a24">${rects}</g></svg>`,size}}
+function hasAccess(c){return !!c&&ACCESS.has(c.id)}
+function grantAccess(c){ACCESS.add(c.id);saveAccess()}
+function revokeAccess(c){ACCESS.delete(c.id);saveAccess()}
+const myCamps=()=>DB.camps.filter(hasAccess);
+function knownCodeFor(id){for(const k in CODES)if(CODES[k].id===id)return k;return null}
+function normalize(d){d.groups||(d.groups=[]);d.groups.forEach(g=>{g.emoji||(g.emoji='🏢');g.color||(g.color=COLORS[1]);g.description||(g.description='');g.website||(g.website='');g.contact||(g.contact='')});const gids=new Set(d.groups.map(g=>g.id));const codes=new Set();d.camps.forEach(c=>{c.campers||(c.campers=[]);c.staff||(c.staff=[]);c.activities||(c.activities=[]);c.checklist||(c.checklist=[]);c.announcements||(c.announcements=[]);if(c.groupId&&!gids.has(c.groupId))c.groupId=null;if(!c.code){c.code=knownCodeFor(c.id)||genCode(codes);if(!knownCodeFor(c.id))c._legacy=true}codes.add(c.code)});d.trash||(d.trash=[]);d.trash.forEach(c=>{if(!c.code)c.code=genCode(codes);codes.add(c.code)});return d}
+let DB=load();
+DB.camps.forEach(c=>{if(c._legacy){delete c._legacy;grantAccess(c)}});rememberAllCodes();
+function load(){return normalize(parse(store.get(KEY))||parse(store.get(BACKUP_KEY))||seed())}
+let lastSaved=null,saveTimer=null;
+function save(){
+  rememberAllCodes();
+  const json=JSON.stringify(DB);
+  if(json===save._last)return;
+  const prev=store.get(KEY);if(prev&&prev!==json)store.set(BACKUP_KEY,prev);
+  store.set(KEY,json);save._last=json;lastSaved=new Date();updateSaveBadge();
+}
+function updateSaveBadge(){const b=document.getElementById('saveBadge');if(!b||!lastSaved)return;b.textContent='✓ Saved '+lastSaved.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}
+// If localStorage was unavailable at boot but IndexedDB has newer data, recover it
+idb.get(ACCESS_KEY).then(v=>{try{const a=JSON.parse(v||'[]');if(a.length&&!store.get(ACCESS_KEY)){ACCESS=new Set(a);saveAccess();render()}}catch(e){}});
+idb.get(CODES_KEY).then(v=>{try{const c=JSON.parse(v||'{}');if(Object.keys(c).length&&!store.get(CODES_KEY)){CODES=c;store.set(CODES_KEY,JSON.stringify(CODES))}}catch(e){}});
+idb.get(KEY).then(v=>{const d=parse(v);if(d&&!parse(store.get(KEY))&&(d.camps.length||d.trash?.length)){DB=normalize(d);save._last=null;render();toast('Recovered your camps from device storage')}});
+// Persist when the tab is hidden/closed and keep tabs in sync
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+window.addEventListener('beforeunload',save);
+window.addEventListener('pagehide',save);
+window.addEventListener('storage',e=>{if(e.key===ACCESS_KEY&&e.newValue){try{ACCESS=new Set(JSON.parse(e.newValue));render()}catch(x){}}if(e.key===KEY&&e.newValue&&e.newValue!==save._last){const d=parse(e.newValue);if(d){DB=normalize(d);save._last=e.newValue;render()}}});
+setInterval(save,15000);
+
+/* ============ Helpers ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=d=>d?new Date(d+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'—';
+const fmtShort=d=>new Date(d+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
+const money=n=>n?'$'+Number(n).toLocaleString():'Free';
+function campStatus(c){const t=today();if(!c.published)return'draft';if(c.end<t)return'past';if(c.start>t)return'upcoming';return'active'}
+function enrolled(c){return c.campers.filter(x=>x.status!=='Cancelled'&&x.status!=='Waitlisted').length}
+function waitlisted(c){return c.campers.filter(x=>x.status==='Waitlisted').length}
+function waitMax(c){return c.waitlistMax==null?null:+c.waitlistMax}
+function waitFull(c){const m=waitMax(c);return m!=null&&waitlisted(c)>=m}
+const fmtTime=iso=>new Date(iso).toLocaleString(undefined,{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+function linkify(t){return esc(t).replace(/(https?:\/\/[^\s<]+)/g,u=>`<a href="${u}" target="_blank" rel="noopener">${u}</a>`)}
+const ann=c=>c.announcements||(c.announcements=[]);
+function days(c){return Math.max(1,Math.round((new Date(c.end)-new Date(c.start))/86400000)+1)}
+function initials(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+function avColor(n){let h=0;for(const ch of n)h=(h*31+ch.charCodeAt(0))>>>0;return COLORS[h%COLORS.length]}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200)}
+function daysUntil(d){return Math.round((new Date(d+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000)}
+const ICONS={
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4l10-10-4-4L4 16v4ZM13 7l4 4"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="m15 5-7 7 7 7"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><circle cx="17" cy="9" r="2.5"/><path d="M15.5 14.5A5 5 0 0 1 22 19"/></svg>',
+  tent:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 2 21h20L12 3Z"/><path d="M12 11 8 21h8l-4-10Z"/></svg>',
+  fire:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 1-3s0 2 2 2c0-4-1-6 2-9Z"/></svg>',
+  dollar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 6.5C17 4.5 14.8 4 12 4S7 5 7 7.5 9.5 11 12 11s5 1 5 4-2.5 4-5 4-5-.5-5-2.5"/></svg>',
+  building:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/><path d="M9 21v-5h6v5M9 10h.01M15 10h.01M9 13h.01M15 13h.01"/></svg>',
+  qr:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M17 20h.01M20 17v4h-3"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+  menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>'
+};
+
+/* ============ Routing ============ */
+let state={view:'dashboard',campId:null,groupId:null,tab:'overview',q:'',filter:'all',sort:'start',groupFilter:'all'};
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{go(b.dataset.view);$('#sidebar').classList.remove('open')});
+function go(view,campId=null){if(view==='group'){state.groupId=campId;campId=null}if(view==='camp'){const c=DB.camps.find(x=>x.id===campId);if(c&&!hasAccess(c)){openJoinModal(c.id);return}}state.view=view;state.campId=campId;if(view==='camp')state.tab='overview';document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view||(view==='camp'&&b.dataset.view==='camps')||(view==='group'&&b.dataset.view==='groups')));render();window.scrollTo(0,0)}
+function render(){
+  purgeOldTrash();
+  const m=$('#main');
+  if(state.view==='dashboard')m.innerHTML=Dashboard();
+  else if(state.view==='camps')m.innerHTML=Camps();
+  else if(state.view==='campers')m.innerHTML=Campers();
+  else if(state.view==='schedule')m.innerHTML=Schedule();
+  else if(state.view==='camp')m.innerHTML=CampDetail();
+  else if(state.view==='nospots')m.innerHTML=NoSpots();
+  else if(state.view==='groups')m.innerHTML=Groups();
+  else if(state.view==='group')m.innerHTML=GroupDetail();
+  save();
+}
+const topbar=(title,sub,actions='')=>`<div class="topbar"><div style="display:flex;gap:12px;align-items:center"><button class="btn menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">${ICONS.menu}</button><div><h1>${title}</h1><p class="sub">${sub}</p></div></div><div style="display:flex;gap:8px">${actions}</div></div>`;
+
+/* ============ Views ============ */
+function Dashboard(){
+  const cs=myCamps();const t=today();const locked=DB.camps.length-cs.length;
+  const upcoming=cs.filter(c=>campStatus(c)==='upcoming').sort((a,b)=>a.start.localeCompare(b.start));
+  const active=cs.filter(c=>campStatus(c)==='active');
+  const totalCampers=cs.reduce((s,c)=>s+enrolled(c),0);
+  const cap=cs.filter(c=>campStatus(c)!=='past').reduce((s,c)=>s+c.capacity,0);
+  const fill=cs.filter(c=>campStatus(c)!=='past').reduce((s,c)=>s+enrolled(c),0);
+  const revenue=cs.reduce((s,c)=>s+enrolled(c)*(c.price||0),0);
+  const todos=cs.flatMap(c=>c.checklist.filter(x=>!x.done).map(x=>({...x,camp:c}))).slice(0,8);
+  const greet=new Date().getHours()<12?'Good morning':new Date().getHours()<18?'Good afternoon':'Good evening';
+  return topbar(`${greet} 👋`,`Here's what's happening across your camps.${locked?` ${locked} locked camp${locked===1?'':'s'} on this device — join with a code.`:''}`,`<button class="btn" onclick="openJoinModal()">${ICONS.lock} Join camp</button><button class="btn primary" onclick="openCampForm()">${ICONS.plus} New camp</button>`)+
+  `<div class="stats">
+    <div class="stat"><div class="ic">${ICONS.tent}</div><div><div class="v">${cs.length}</div><div class="l">Your camps · ${active.length} running now</div></div></div>
+    <div class="stat"><div class="ic">${ICONS.users}</div><div><div class="v">${totalCampers}</div><div class="l">Campers enrolled</div></div></div>
+    <div class="stat"><div class="ic">${ICONS.fire}</div><div><div class="v">${cap?Math.round(fill/cap*100):0}%</div><div class="l">Capacity filled (${fill}/${cap})</div></div></div>
+    <div class="stat"><div class="ic">${ICONS.dollar}</div><div><div class="v">${money(revenue)}</div><div class="l">Projected revenue</div></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>Upcoming & active camps</h2>
+      ${(active.concat(upcoming)).length?`<ul class="ul">${active.concat(upcoming).map(c=>{const d=daysUntil(c.start);return`<li onclick="go('camp','${c.id}')"><div class="date" style="background:${c.color}"><small>${fmtShort(c.start).split(' ')[0]}</small><b>${fmtShort(c.start).split(' ')[1]}</b></div><div class="info"><div>${c.emoji} ${esc(c.name)}</div><small>${esc(c.location)} · ${enrolled(c)}/${c.capacity} campers</small></div><span class="in">${d<0?'In progress':d===0?'Starts today':`in ${d} day${d===1?'':'s'}`}</span></li>`}).join('')}</ul>`:
+      `<div class="empty"><div class="big">🏕️</div><p>No upcoming camps yet.</p><button class="btn primary" onclick="openCampForm()">Create your first camp</button></div>`}
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:20px"><h2>Open to-dos</h2>
+        ${todos.length?`<div class="checklist">${todos.map(x=>`<label><input type="checkbox" onchange="toggleCheck('${x.camp.id}','${x.id}')"><span>${esc(x.text)} <small style="color:var(--muted)">· ${esc(x.camp.name)}</small></span></label>`).join('')}</div>`:`<p class="sub">All caught up! 🎉</p>`}
+      </div>
+      ${DB.groups.length?`<div class="card" style="margin-bottom:20px"><h2>Your groups</h2><ul class="ul">${DB.groups.map(g=>`<li onclick="go('group','${g.id}')"><div class="date" style="background:${g.color};font-size:22px">${g.emoji}</div><div class="info"><div>${esc(g.name)}</div><small>${groupCamps(g).length} camp${groupCamps(g).length===1?'':'s'} · ${groupCamps(g).reduce((s,c)=>s+enrolled(c),0)} campers</small></div></li>`).join('')}</ul></div>`:''}
+      <div class="card"><h2>Quick actions</h2>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn" onclick="openCampForm()">${ICONS.plus} Create a camp</button>
+          <button class="btn" onclick="openGroupForm()">${ICONS.building} Create a business / group</button>
+          <button class="btn" onclick="openJoinModal()">${ICONS.lock} Join a camp with a code</button>
+          <button class="btn" onclick="go('campers')">${ICONS.users} Browse all campers</button>
+          <button class="btn" onclick="go('schedule')">${ICONS.cal} View schedule</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function Camps(){
+  let list=DB.camps.filter(c=>{
+    const q=state.q.toLowerCase();
+    const okQ=!q||c.name.toLowerCase().includes(q)||c.location.toLowerCase().includes(q)||c.type.toLowerCase().includes(q);
+    const okF=state.filter==='all'||campStatus(c)===state.filter;
+    const okG=state.groupFilter==='all'||(state.groupFilter==='none'?!c.groupId:c.groupId===state.groupFilter);
+    return okQ&&okF&&okG;
+  });
+  list.sort((a,b)=>state.sort==='name'?a.name.localeCompare(b.name):state.sort==='fill'?(enrolled(b)/b.capacity)-(enrolled(a)/a.capacity):a.start.localeCompare(b.start));
+  const nLocked=DB.camps.filter(c=>!hasAccess(c)).length;
+  return topbar('Camps',`${myCamps().length} camp${myCamps().length===1?'':'s'} you can access${nLocked?` · ${nLocked} locked`:''}`,`<button class="btn" onclick="openJoinModal()">${ICONS.lock} Join camp</button><button class="btn primary" onclick="openCampForm()">${ICONS.plus} New camp</button>`)+
+  `<div class="toolbar">
+    <div class="search">${ICONS.search}<input placeholder="Search camps by name, location or type…" value="${esc(state.q)}" oninput="state.q=this.value;renderKeepFocus(this)"></div>
+    <select onchange="state.filter=this.value;render()">${['all','active','upcoming','past','draft'].map(f=>`<option value="${f}" ${state.filter===f?'selected':''}>${f==='all'?'All statuses':f[0].toUpperCase()+f.slice(1)}</option>`).join('')}</select>
+    ${DB.groups.length?`<select onchange="state.groupFilter=this.value;render()"><option value="all" ${state.groupFilter==='all'?'selected':''}>All groups</option>${DB.groups.map(g=>`<option value="${g.id}" ${state.groupFilter===g.id?'selected':''}>${g.emoji} ${esc(g.name)}</option>`).join('')}<option value="none" ${state.groupFilter==='none'?'selected':''}>Independent camps</option></select>`:''}
+    <select onchange="state.sort=this.value;render()"><option value="start" ${state.sort==='start'?'selected':''}>Sort: Start date</option><option value="name" ${state.sort==='name'?'selected':''}>Sort: Name</option><option value="fill" ${state.sort==='fill'?'selected':''}>Sort: Fill rate</option></select>
+  </div>
+  ${list.length?`<div class="camps">${list.map(CampCard).join('')}</div>`:`<div class="empty"><div class="big">🔍</div><p>${DB.camps.length?'No camps match. Try another search, or create a new one.':'No camps yet — create your first one.'}</p><button class="btn primary" onclick="openCampForm()">${ICONS.plus} New camp</button></div>`}
+  ${DB.trash.length?`<details class="trash"><summary>🗑️ Recently deleted (${DB.trash.length})</summary><ul class="ul">${DB.trash.map(c=>`<li style="cursor:default"><div class="date" style="background:${c.color}"><small>${fmtShort(c.start).split(' ')[0]}</small><b>${fmtShort(c.start).split(' ')[1]}</b></div><div class="info"><div>${c.emoji} ${esc(c.name)}</div><small>Deleted ${fmt(c.deletedAt.slice(0,10))} · ${c.campers.length} campers</small></div><button class="btn sm" onclick="restoreCamp('${c.id}')">Restore</button><button class="btn sm danger" onclick="purgeCamp('${c.id}')">Delete forever</button></li>`).join('')}</ul></details>`:''}`;
+}
+function renderKeepFocus(el){const pos=el.selectionStart;render();const n=$('.search input');if(n){n.focus();n.setSelectionRange(pos,pos)}}
+function CampCard(c){
+  const e=enrolled(c),pct=Math.min(100,Math.round(e/c.capacity*100)),st=campStatus(c),locked=!hasAccess(c);
+  return`<div class="camp ${locked?'locked':''}" onclick="go('camp','${c.id}')">
+    <div class="band" style="background:linear-gradient(135deg,${c.color},${c.color}bb)"><span class="emoji">${c.emoji}</span>${locked?`<span class="lock-tag">${ICONS.lock} Code required</span>`:''}</div>
+    <div class="body">
+      <div class="name"><span>${esc(c.name)}</span><span class="pill ${st}">${st}</span></div>
+      ${groupOf(c)?`<div class="group-tag" onclick="event.stopPropagation();go('group','${c.groupId}')">${groupOf(c).emoji} ${esc(groupOf(c).name)}</div>`:''}
+      <div class="meta">${ICONS.pin}${esc(c.location)}</div>
+      <div class="meta">${ICONS.cal}${fmt(c.start)} – ${fmt(c.end)} · ${days(c)}d</div>
+      <div class="meta"><span>${esc(c.type)}</span>·<span>Ages ${c.ageMin}–${c.ageMax}</span>·<span>${money(c.price)}</span></div>
+      <div style="margin-top:auto;padding-top:6px"><div class="progress"><i class="${pct>=100?'full':''}" style="width:${pct}%"></i></div><div class="cap"><span>${e} enrolled${waitlisted(c)?` · ${waitlisted(c)}${waitMax(c)!=null?`/${waitMax(c)}`:''} waitlisted`:''}</span><span>${c.capacity-e>0?`${c.capacity-e} spots left`:'Full'}</span></div></div>
+    </div></div>`;
+}
+
+function Campers(){
+  const q=state.q.toLowerCase();
+  const rows=myCamps().flatMap(c=>c.campers.map(p=>({p,c}))).filter(({p,c})=>!q||p.name.toLowerCase().includes(q)||(p.guardian||'').toLowerCase().includes(q)||c.name.toLowerCase().includes(q)).sort((a,b)=>a.p.name.localeCompare(b.p.name));
+  return topbar('Campers',`${rows.length} registration${rows.length===1?'':'s'} across all camps`)+
+  `<div class="toolbar"><div class="search">${ICONS.search}<input placeholder="Search campers, guardians or camps…" value="${esc(state.q)}" oninput="state.q=this.value;renderKeepFocus(this)"></div></div>
+  <div class="card" style="padding:6px 10px">${rows.length?`<table><thead><tr><th>Camper</th><th>Age</th><th>Camp</th><th>Guardian</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>
+  ${rows.map(({p,c})=>`<tr><td><span class="avatar" style="background:${avColor(p.name)}">${initials(p.name)}</span><b>${esc(p.name)}</b>${p.notes?`<div style="font-size:12px;color:var(--muted);margin-left:42px">${esc(p.notes)}</div>`:''}</td><td>${p.age||'—'}</td><td><a href="#" onclick="event.preventDefault();go('camp','${c.id}')">${c.emoji} ${esc(c.name)}</a></td><td>${esc(p.guardian)||'—'}</td><td>${esc(p.contact)||'—'}</td><td><select class="status-sel" onchange="setStatus('${c.id}','${p.id}',this.value)">${STATUSES.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select>${p.status==='Waitlisted'?`<div class="wl-pos ${waitPos(c,p)===1?'first':''}" onclick="showWaitlistModal('${c.id}','${p.id}')">#${waitPos(c,p)} in line${waitPos(c,p)===1?' · joins when a spot opens':''}</div>`:p.promotedAt?`<div class="wl-pos joined">✓ joined from waitlist</div>`:''}</td><td><button class="icon-btn" title="Edit" onclick="openCamperForm('${c.id}','${p.id}')">${ICONS.edit}</button></td></tr>`).join('')}
+  </tbody></table>`:`<div class="empty" style="margin:10px"><div class="big">🧒</div><p>No campers found.</p></div>`}</div>`;
+}
+
+function Schedule(){
+  const cs=myCamps().filter(c=>c.published).sort((a,b)=>a.start.localeCompare(b.start));
+  if(!cs.length)return topbar('Schedule','Timeline of all published camps')+`<div class="empty"><div class="big">📅</div><p>No published camps yet.</p></div>`;
+  const min=cs[0].start,max=cs.reduce((m,c)=>c.end>m?c.end:m,cs[0].end);
+  const span=Math.max(1,(new Date(max)-new Date(min))/86400000+1);
+  const months=[];let d=new Date(min+'T00:00:00');d.setDate(1);while(d<=new Date(max+'T00:00:00')){months.push(new Date(d));d.setMonth(d.getMonth()+1)}
+  const pos=x=>Math.max(0,((new Date(x+'T00:00:00')-new Date(min+'T00:00:00'))/86400000)/span*100);
+  const tPos=pos(today());
+  return topbar('Schedule',`${fmt(min)} – ${fmt(max)}`)+
+  `<div class="card" style="overflow-x:auto"><div style="min-width:700px">
+    <div style="position:relative;height:22px;border-bottom:1px solid var(--line);margin-bottom:8px;font-size:12px;color:var(--muted)">${months.map(m=>`<span style="position:absolute;left:${pos(m.toISOString().slice(0,10))}%">${m.toLocaleDateString(undefined,{month:'short',year:'numeric'})}</span>`).join('')}</div>
+    <div style="position:relative">
+      ${tPos>=0&&tPos<=100?`<div style="position:absolute;left:${tPos}%;top:0;bottom:0;border-left:2px dashed var(--accent);z-index:1"></div><span style="position:absolute;left:${tPos}%;top:-4px;transform:translateX(-50%);font-size:10px;background:var(--accent);color:#fff;padding:1px 6px;border-radius:99px;z-index:2">Today</span>`:''}
+      ${cs.map(c=>{const l=pos(c.start),w=Math.max(1.5,(days(c)/span)*100);return`<div style="display:flex;align-items:center;gap:12px;height:44px"><div style="width:180px;flex-shrink:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.emoji} ${esc(c.name)}</div><div style="flex:1;position:relative;height:28px"><div onclick="go('camp','${c.id}')" title="${esc(c.name)}: ${fmt(c.start)} – ${fmt(c.end)}" style="position:absolute;left:${l}%;width:${w}%;top:0;height:28px;background:${c.color};border-radius:8px;cursor:pointer;color:#fff;font-size:12px;line-height:28px;padding:0 8px;white-space:nowrap;overflow:hidden">${fmtShort(c.start)} · ${enrolled(c)}/${c.capacity}</div></div></div>`}).join('')}
+    </div></div></div>
+  <h2 style="font-size:17px;margin:26px 0 12px">All activities by date</h2>
+  ${(()=>{const items=cs.flatMap(c=>c.activities.map(a=>({...a,camp:c,date:addDays(c.start,a.day-1)}))).sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));if(!items.length)return`<p class="sub">No activities scheduled yet. Open a camp → Schedule tab to add some.</p>`;
+    const byDate={};items.forEach(i=>(byDate[i.date]=byDate[i.date]||[]).push(i));
+    return Object.keys(byDate).map(d=>`<div class="day"><h3>${fmt(d)}${d===today()?' · Today':''}</h3>${byDate[d].map(a=>`<div class="act"><span class="t">${a.time}</span><span class="n">${esc(a.title)}<small>${a.camp.emoji} ${esc(a.camp.name)}</small></span>${a.location?`<span class="loc">${esc(a.location)}</span>`:''}</div>`).join('')}</div>`).join('')})()}`;
+}
+
+function Groups(){
+  const q=state.q.toLowerCase();
+  const list=DB.groups.filter(g=>!q||g.name.toLowerCase().includes(q)||(g.description||'').toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
+  return topbar('Businesses & camp groups',`${DB.groups.length} group${DB.groups.length===1?'':'s'} · organize camps under one organization`,`<button class="btn primary" onclick="openGroupForm()">${ICONS.plus} New group</button>`)+
+  `<div class="toolbar"><div class="search">${ICONS.search}<input placeholder="Search groups…" value="${esc(state.q)}" oninput="state.q=this.value;renderKeepFocus(this)"></div></div>
+  ${list.length?`<div class="camps">${list.map(GroupCard).join('')}</div>`:`<div class="empty"><div class="big">🏢</div><p>${DB.groups.length?'No groups match your search.':'No groups yet. Create a business or camp group, then add camps to it — like "Sunny Days Youth Org" with its summer, spring and sports camps.'}</p><button class="btn primary" onclick="openGroupForm()">${ICONS.plus} Create your first group</button></div>`}`;
+}
+function GroupCard(g){
+  const cs=groupCamps(g),mine=cs.filter(hasAccess),camp=cs.reduce((s,c)=>s+enrolled(c),0),cap=cs.reduce((s,c)=>s+c.capacity,0),active=cs.filter(c=>campStatus(c)==='active').length,up=cs.filter(c=>campStatus(c)==='upcoming').length;
+  return`<div class="camp" onclick="go('group','${g.id}')">
+    <div class="band" style="background:linear-gradient(135deg,${g.color},${g.color}bb)"><span class="emoji">${g.emoji}</span></div>
+    <div class="body">
+      <div class="name"><span>${esc(g.name)}</span><span class="pill" style="background:#eef1ef;color:var(--muted)">${cs.length} camp${cs.length===1?'':'s'}</span></div>
+      ${g.description?`<div class="meta" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(g.description)}</div>`:''}
+      <div class="meta"><span>${active} active</span>·<span>${up} upcoming</span>·<span>${camp} campers</span></div>
+      <div class="group-strip">${cs.slice(0,8).map(c=>`<span title="${esc(c.name)}" style="background:${c.color}">${c.emoji}</span>`).join('')}${cs.length>8?`<span class="more">+${cs.length-8}</span>`:''}${!cs.length?'<span class="sub" style="font-size:12px">No camps yet</span>':''}</div>
+      <div style="margin-top:auto;padding-top:6px"><div class="progress"><i style="width:${cap?Math.min(100,camp/cap*100):0}%"></i></div><div class="cap"><span>${cap?Math.round(camp/cap*100):0}% of total capacity</span><span>${mine.length<cs.length?`${cs.length-mine.length} locked`:''}</span></div></div>
+    </div></div>`;
+}
+function GroupDetail(){
+  const g=DB.groups.find(x=>x.id===state.groupId);if(!g){go('groups');return''}
+  const cs=groupCamps(g).sort((a,b)=>a.start.localeCompare(b.start)),mine=cs.filter(hasAccess);
+  const camp=cs.reduce((s,c)=>s+enrolled(c),0),cap=cs.reduce((s,c)=>s+c.capacity,0),rev=mine.reduce((s,c)=>s+enrolled(c)*(c.price||0),0),staff=new Set(mine.flatMap(c=>c.staff.map(x=>x.name.toLowerCase()))).size;
+  const unassigned=DB.camps.filter(c=>!c.groupId&&hasAccess(c));
+  const byStatus=k=>cs.filter(c=>campStatus(c)===k);
+  const section=(title,arr)=>arr.length?`<h2 style="font-size:16px;margin:22px 0 12px;color:var(--muted)">${title} <span class="pill" style="background:#eef1ef;color:var(--muted)">${arr.length}</span></h2><div class="camps">${arr.map(CampCard).join('')}</div>`:'';
+  return`<button class="back" onclick="go('groups')">${ICONS.back} All groups</button>
+  <div class="hero" style="background:linear-gradient(135deg,${g.color},${g.color}cc)">
+    <div><span class="pill" style="background:rgba(255,255,255,.22);color:#fff">Business / camp group</span><h1><span style="font-size:36px">${g.emoji}</span>${esc(g.name)}</h1>
+    <div class="meta">${g.website?`<a href="${esc(/^https?:/i.test(g.website)?g.website:'https://'+g.website)}" target="_blank" rel="noopener" style="color:#fff">🌐 ${esc(g.website.replace(/^https?:\/\//,''))}</a>`:''}${g.contact?`<span>✉️ ${esc(g.contact)}</span>`:''}<span>${cs.length} camp${cs.length===1?'':'s'}</span></div></div>
+    <div class="actions"><button class="btn" onclick="openCampForm(null,'${g.id}')">${ICONS.plus} New camp in group</button>${unassigned.length?`<button class="btn" onclick="openAssignModal('${g.id}')">Add existing camps</button>`:''}<button class="btn" onclick="openGroupForm('${g.id}')">${ICONS.edit} Edit</button><button class="btn" onclick="deleteGroup('${g.id}')">${ICONS.trash}</button></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="ic">${ICONS.tent}</div><div><div class="v">${cs.length}</div><div class="l">Camps · ${byStatus('active').length} running now</div></div></div>
+    <div class="stat"><div class="ic">${ICONS.users}</div><div><div class="v">${camp}</div><div class="l">Campers enrolled</div></div></div>
+    <div class="stat"><div class="ic">${ICONS.fire}</div><div><div class="v">${cap?Math.round(camp/cap*100):0}%</div><div class="l">Capacity filled (${camp}/${cap})</div></div></div>
+    <div class="stat"><div class="ic">${ICONS.dollar}</div><div><div class="v">${money(rev)}</div><div class="l">Projected revenue · ${staff} staff</div></div></div>
+  </div>
+  ${g.description?`<div class="card" style="margin-bottom:6px"><h2>About</h2><p class="desc" style="margin:0">${esc(g.description)}</p></div>`:''}
+  ${cs.length?section('Active',byStatus('active'))+section('Upcoming',byStatus('upcoming'))+section('Drafts',byStatus('draft'))+section('Past',byStatus('past')):`<div class="empty" style="margin-top:20px"><div class="big">${g.emoji}</div><p>No camps in this group yet.</p><div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap"><button class="btn primary" onclick="openCampForm(null,'${g.id}')">${ICONS.plus} Create a camp in ${esc(g.name)}</button>${unassigned.length?`<button class="btn" onclick="openAssignModal('${g.id}')">Add existing camps</button>`:''}</div></div>`}`;
+}
+function openGroupForm(id){
+  const g=id?DB.groups.find(x=>x.id===id):{name:'',emoji:'🏢',color:COLORS[1],description:'',website:'',contact:''};
+  openModal(modalHeader(id?'Edit group':'Create a business / camp group')+`<form class="content" id="groupForm" onsubmit="saveGroup(event,'${id||''}')">
+    <input type="hidden" name="color" value="${g.color}"><input type="hidden" name="emoji" value="${g.emoji}">
+    <div class="form">
+      ${field('Organization name',`<input name="name" required placeholder="e.g. Sunny Days Youth Organization" value="${esc(g.name)}">`,true)}
+      ${field('Website (optional)',`<input name="website" placeholder="sunnydays.org" value="${esc(g.website)}">`)}
+      ${field('Contact (optional)',`<input name="contact" placeholder="hello@sunnydays.org" value="${esc(g.contact)}">`)}
+      ${field('Icon',`<div class="emojis">${GROUP_EMOJIS.map(e=>`<span class="${g.emoji===e?'sel':''}" onclick="pickG(this,'emoji','${e}')">${e}</span>`).join('')}</div>`,true)}
+      ${field('Color',`<div class="swatches">${COLORS.map(k=>`<span class="${g.color===k?'sel':''}" style="background:${k}" onclick="pickG(this,'color','${k}')"></span>`).join('')}</div>`,true)}
+      ${field('Description',`<textarea name="description" placeholder="What does this organization do?">${esc(g.description)}</textarea>`,true)}
+    </div>
+    <footer><button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">${id?'Save changes':'Create group'}</button></footer></form>`);
+}
+function pickG(el,name,val){el.parentElement.querySelectorAll('span').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');$(`#groupForm [name=${name}]`).value=val}
+function saveGroup(e,id){e.preventDefault();const o=Object.fromEntries(new FormData(e.target).entries());const d={name:o.name.trim(),emoji:o.emoji,color:o.color,description:o.description.trim(),website:o.website.trim(),contact:o.contact.trim()};
+  if(id){Object.assign(DB.groups.find(x=>x.id===id),d);toast('Group updated');closeModal(true);render()}else{const g={id:uid(),...d,createdAt:new Date().toISOString()};DB.groups.push(g);toast('Group created 🎉');closeModal(true);go('group',g.id)}}
+function deleteGroup(id){const g=DB.groups.find(x=>x.id===id);const n=groupCamps(g).length;if(!confirm(`Delete "${g.name}"?${n?` Its ${n} camp${n>1?'s':''} will be kept and become independent.`:''}`))return;DB.camps.forEach(c=>{if(c.groupId===id)c.groupId=null});DB.groups=DB.groups.filter(x=>x.id!==id);toast('Group deleted');go('groups')}
+function openAssignModal(gid){const g=DB.groups.find(x=>x.id===gid);const list=DB.camps.filter(c=>c.groupId!==gid&&hasAccess(c));
+  openModal(modalHeader(`Add camps to ${esc(g.name)}`)+`<form class="content" onsubmit="assignCamps(event,'${gid}')"><div class="checklist" style="max-height:50vh;overflow:auto">${list.map(c=>`<label><input type="checkbox" name="c" value="${c.id}"><span style="flex:1">${c.emoji} ${esc(c.name)} <small style="color:var(--muted)">· ${fmtShort(c.start)}${groupOf(c)?` · currently in ${esc(groupOf(c).name)}`:''}</small></span></label>`).join('')}</div>
+  <footer><button type="button" class="btn" onclick="closeModal(true)">Cancel</button><button class="btn primary">Add selected</button></footer></form>`)}
+function assignCamps(e,gid){e.preventDefault();const ids=[...e.target.querySelectorAll('input:checked')].map(i=>i.value);ids.forEach(id=>{DB.camps.find(c=>c.id===id).groupId=gid});toast(`${ids.length} camp${ids.length===1?'':'s'} added`);closeModal(true);render()}
+function NoSpots(){
+  const c=DB.camps.find(x=>x.id===state.campId);
+  return`<div class="nospots">
+    <div class="nospots-box">
+      <div class="nospots-icon">${c?c.emoji:'🏕️'}</div>
+      <div class="nospots-badge">ERROR</div>
+      <h1>NO SPOTS REMAINING IN THIS CAMP</h1>
+      ${c?`<p class="sub">${esc(c.name)} is full — all <b>${c.capacity}</b> camper spots${waitMax(c)?` and all <b>${waitMax(c)}</b> waitlist spots`:''} are taken. Please contact the camp organizer to be notified if a spot opens up.</p>`:''}
+      <button class="btn primary" onclick="go('dashboard')">← Back to Dashboard</button>
+    </div>
+  </div>`;
+}
+function CampDetail(){
+  const c=DB.camps.find(x=>x.id===state.campId);if(!c){go('camps');return''}
+  const st=campStatus(c),e=enrolled(c);
+  const tabs=[['overview','Overview'],['announcements','Announcements',ann(c).length],['campers','Campers',c.campers.length],['schedule','Schedule',c.activities.length],['staff','Staff',c.staff.length],['checklist','Checklist',c.checklist.filter(x=>!x.done).length]];
+  let body='';
+  if(state.tab==='overview'){
+    const pct=Math.min(100,Math.round(e/c.capacity*100));
+    body=`<div class="grid2"><div class="card"><h2>Details</h2><div class="kv">
+      <div><b>Type</b><span>${esc(c.type)}</span></div><div><b>Ages</b><span>${c.ageMin} – ${c.ageMax}</span></div><div><b>Duration</b><span>${days(c)} day${days(c)>1?'s':''}</span></div><div><b>Price</b><span>${money(c.price)}</span></div>
+      <div><b>Enrolled</b><span>${e} / ${c.capacity}</span></div><div><b>Waitlist</b><span>${waitlisted(c)}${waitMax(c)!=null?` / ${waitMax(c)}`:''}</span></div><div><b>Revenue</b><span>${money(e*(c.price||0))}</span></div><div><b>Visibility</b><span>${c.published?'Published':'Draft'}</span></div></div>
+      <div style="margin-top:16px"><div class="progress"><i class="${pct>=100?'full':''}" style="width:${pct}%"></i></div><div class="cap"><span>${pct}% full</span><span>${Math.max(0,c.capacity-e)} spots left</span></div></div>
+      ${c.description?`<p class="desc">${esc(c.description)}</p>`:'<p class="sub" style="margin-top:14px">No description yet.</p>'}</div>
+      <div><div class="card code-card" style="margin-bottom:20px"><h2>Camp access code</h2><div class="code-display" onclick="copyCode('${c.id}')" title="Click to copy">${fmtCode(c.code)}</div><p class="sub" style="margin:8px 0 12px">This code is permanent for this camp. Share it with your Campusers — they'll enter it under <b>Join camp</b> to unlock the camp.</p><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm primary" onclick="copyCode('${c.id}')">📋 Copy code</button><button class="btn sm" onclick="showQRModal('${c.id}')">${ICONS.qr} QR code</button><button class="btn sm" onclick="lockCamp('${c.id}')">${ICONS.lock} Lock on this device</button></div></div>
+      <div class="card" style="margin-bottom:20px"><h2>Countdown</h2>${st==='upcoming'?`<div style="font-size:40px;font-weight:800;letter-spacing:-1px;color:${c.color}">${daysUntil(c.start)}<span style="font-size:16px;color:var(--muted);font-weight:600"> days to go</span></div>`:st==='active'?`<div style="font-size:22px;font-weight:800;color:${c.color}">Day ${daysUntil(c.start)*-1+1} of ${days(c)} 🔥</div>`:st==='past'?`<div class="sub">Wrapped up ${-daysUntil(c.end)} days ago.</div>`:`<div class="sub">Publish this camp to open registration.</div>`}</div>
+      <div class="card" style="margin-bottom:20px"><h2>Latest announcement</h2>${ann(c).length?(a=>`<div style="font-weight:700">${a.pinned?'📌 ':''}${esc(a.title)}</div><div style="font-size:13px;color:var(--muted);margin:2px 0 8px">${fmtTime(a.createdAt)}</div><div style="font-size:14px;line-height:1.5;white-space:pre-wrap">${linkify(a.body)}</div>${a.link?`<a class="btn sm" style="margin-top:10px" href="${esc(a.link)}" target="_blank" rel="noopener">🔗 ${esc(a.linkLabel||a.link)}</a>`:''}<div style="margin-top:10px"><a href="#" onclick="event.preventDefault();state.tab='announcements';render()">All announcements →</a></div>`)(ann(c).slice().sort((x,y)=>(y.pinned-x.pinned)||y.createdAt.localeCompare(x.createdAt))[0]):`<p class="sub">Nothing posted yet.</p><button class="btn sm" onclick="openAnnouncementForm('${c.id}')">${ICONS.plus} Post announcement</button>`}</div>
+      <div class="card"><h2>Recent registrations</h2>${c.campers.length?`<ul class="ul">${c.campers.slice(-5).reverse().map(p=>`<li onclick="state.tab='campers';render()"><span class="avatar" style="background:${avColor(p.name)};margin:0">${initials(p.name)}</span><div class="info"><div>${esc(p.name)}</div><small>${p.status}${p.status==='Waitlisted'?` · #${waitPos(c,p)} in line`:''}</small></div></li>`).join('')}</ul>`:'<p class="sub">No campers yet.</p>'}</div></div></div>`;
+  } else if(state.tab==='announcements'){
+    const list=ann(c).slice().sort((x,y)=>(y.pinned-x.pinned)||y.createdAt.localeCompare(x.createdAt));
+    body=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px"><h2 style="margin:0">Announcements & links</h2><button class="btn primary sm" onclick="openAnnouncementForm('${c.id}')">${ICONS.plus} New post</button></div>
+    ${list.length?`<div class="feed">${list.map(a=>`<article class="post ${a.pinned?'pinned':''}">
+      <div class="post-head"><div><div class="post-title">${a.pinned?'📌 ':''}${esc(a.title)}</div><div class="post-meta">${fmtTime(a.createdAt)}${a.updatedAt?' · edited':''}</div></div>
+      <div class="post-actions"><button class="icon-btn" title="${a.pinned?'Unpin':'Pin to top'}" onclick="togglePin('${c.id}','${a.id}')">${a.pinned?'📌':'📍'}</button><button class="icon-btn" title="Copy text" onclick="copyAnnouncement('${c.id}','${a.id}')">📋</button><button class="icon-btn" onclick="openAnnouncementForm('${c.id}','${a.id}')">${ICONS.edit}</button><button class="icon-btn" onclick="removeAnnouncement('${c.id}','${a.id}')">${ICONS.trash}</button></div></div>
+      ${a.body?`<div class="post-body">${linkify(a.body)}</div>`:''}
+      ${a.link?`<a class="post-link" href="${esc(a.link)}" target="_blank" rel="noopener"><span class="post-link-ic">🔗</span><span><b>${esc(a.linkLabel||a.link)}</b><small>${esc(a.link)}</small></span></a>`:''}
+    </article>`).join('')}</div>`:`<div class="empty"><div class="big">📣</div><p>No announcements yet. Post updates, packing lists, photo album links, forms — anything families need.</p><button class="btn primary" onclick="openAnnouncementForm('${c.id}')">${ICONS.plus} Post your first announcement</button></div>`}</div>`;
+  } else if(state.tab==='campers'){
+    body=`<div class="card" style="padding:6px 10px"><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 10px 6px"><h2 style="margin:0">Roster · ${e}/${c.capacity} enrolled, ${waitlisted(c)}${waitMax(c)!=null?`/${waitMax(c)}`:''} waitlisted</h2><button class="btn primary sm" onclick="openCamperForm('${c.id}')">${ICONS.plus} Add camper</button></div>
+    ${c.campers.length?`<table><thead><tr><th>Camper</th><th>Age</th><th>Guardian</th><th>Contact</th><th>Status</th><th></th></tr></thead><tbody>${c.campers.map(p=>`<tr><td><span class="avatar" style="background:${avColor(p.name)}">${initials(p.name)}</span><b>${esc(p.name)}</b>${p.notes?`<div style="font-size:12px;color:var(--muted);margin-left:42px">${esc(p.notes)}</div>`:''}</td><td>${p.age||'—'}</td><td>${esc(p.guardian)||'—'}</td><td>${esc(p.contact)||'—'}</td><td><select class="status-sel" onchange="setStatus('${c.id}','${p.id}',this.value)">${STATUSES.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select>${p.status==='Waitlisted'?`<div class="wl-pos ${waitPos(c,p)===1?'first':''}" onclick="showWaitlistModal('${c.id}','${p.id}')">#${waitPos(c,p)} in line${waitPos(c,p)===1?' · joins when a spot opens':''}</div>`:p.promotedAt?`<div class="wl-pos joined">✓ joined from waitlist</div>`:''}</td><td style="white-space:nowrap"><button class="icon-btn" onclick="openCamperForm('${c.id}','${p.id}')">${ICONS.edit}</button><button class="icon-btn" onclick="removeCamper('${c.id}','${p.id}')">${ICONS.trash}</button></td></tr>`).join('')}</tbody></table>`:`<div class="empty" style="margin:10px"><div class="big">🧒</div><p>No campers registered yet.</p><button class="btn primary" onclick="openCamperForm('${c.id}')">Add the first camper</button></div>`}</div>`;
+  } else if(state.tab==='schedule'){
+    const n=days(c);let out='';
+    for(let d=1;d<=n;d++){const acts=c.activities.filter(a=>a.day===d).sort((a,b)=>a.time.localeCompare(b.time));
+      out+=`<div class="day"><h3><span>Day ${d} · ${fmt(addDays(c.start,d-1))}</span><button class="btn sm ghost" onclick="openActivityForm('${c.id}',${d})">${ICONS.plus} Add</button></h3>${acts.length?acts.map(a=>`<div class="act"><span class="t">${a.time}</span><span class="n">${esc(a.title)}${a.notes?`<small>${esc(a.notes)}</small>`:''}</span>${a.location?`<span class="loc">${esc(a.location)}</span>`:''}<button class="icon-btn" onclick="openActivityForm('${c.id}',${d},'${a.id}')">${ICONS.edit}</button><button class="icon-btn" onclick="removeActivity('${c.id}','${a.id}')">${ICONS.trash}</button></div>`).join(''):`<div style="font-size:13px;color:var(--muted);padding:4px 12px">Nothing planned yet.</div>`}</div>`}
+    body=`<div class="card"><h2>Daily schedule</h2>${out}</div>`;
+  } else if(state.tab==='staff'){
+    body=`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h2 style="margin:0">Staff & volunteers</h2><button class="btn primary sm" onclick="openStaffForm('${c.id}')">${ICONS.plus} Add staff</button></div>
+    ${c.staff.length?`<div class="staff">${c.staff.map(s=>`<div class="p"><span class="avatar" style="background:${avColor(s.name)}">${initials(s.name)}</span><div><b>${esc(s.name)}</b><div class="r">${esc(s.role)}${s.contact?` · ${esc(s.contact)}`:''}</div></div><button class="icon-btn" onclick="removeStaff('${c.id}','${s.id}')">${ICONS.trash}</button></div>`).join('')}</div><p class="sub" style="margin-top:14px">Ratio: 1 staff per ${c.staff.length?Math.round(Math.max(e,1)/c.staff.length*10)/10:'—'} campers</p>`:`<div class="empty"><div class="big">🧑‍🏫</div><p>No staff assigned yet.</p></div>`}</div>`;
+  } else if(state.tab==='checklist'){
+    const done=c.checklist.filter(x=>x.done).length;
+    body=`<div class="card"><h2>Planning checklist · ${done}/${c.checklist.length} done</h2>
+    ${c.checklist.length?`<div class="progress" style="margin-bottom:12px"><i style="width:${c.checklist.length?done/c.checklist.length*100:0}%"></i></div><div class="checklist">${c.checklist.map(x=>`<label><input type="checkbox" ${x.done?'checked':''} onchange="toggleCheck('${c.id}','${x.id}')"><span class="${x.done?'done':''}" style="flex:1">${esc(x.text)}</span><button class="icon-btn" onclick="event.preventDefault();removeCheck('${c.id}','${x.id}')">${ICONS.trash}</button></label>`).join('')}</div>`:'<p class="sub">Nothing on the list yet.</p>'}
+    <form class="inline-add" onsubmit="event.preventDefault();addCheck('${c.id}',this.t.value);this.reset()"><input name="t" placeholder="Add a task, e.g. 'Confirm bus rental'" required><button class="btn primary">Add</button></form></div>`;
+  }
+  const g=groupOf(c);
+  return`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><button class="back" onclick="go('camps')">${ICONS.back} All camps</button>${g?`<span class="back" style="cursor:default">/</span><button class="back" onclick="go('group','${g.id}')">${g.emoji} ${esc(g.name)}</button>`:''}</div>
+  <div class="hero" style="background:linear-gradient(135deg,${c.color},${c.color}cc)">
+    <div><span class="pill ${st}" style="background:rgba(255,255,255,.22);color:#fff">${st}</span>${g?`<span class="pill" style="background:rgba(255,255,255,.22);color:#fff;margin-left:6px;cursor:pointer" onclick="go('group','${g.id}')">${g.emoji} ${esc(g.name)}</span>`:''}<h1><span style="font-size:36px">${c.emoji}</span>${esc(c.name)}</h1>
+    <div class="meta"><span>${ICONS.pin.replace('<svg','<svg width="14" height="14" style="vertical-align:-2px"')} ${esc(c.location)}</span><span>${fmt(c.start)} – ${fmt(c.end)}</span><span>${esc(c.type)}</span><span>Ages ${c.ageMin}–${c.ageMax}</span></div></div>
+    <div class="actions"><button class="btn" onclick="showQRModal('${c.id}')">${ICONS.qr} QR code</button><button class="btn" onclick="showCodeModal('${c.id}')">${ICONS.lock} Invite code</button><button class="btn" onclick="togglePublish('${c.id}')">${c.published?'Unpublish':'Publish'}</button><button class="btn" onclick="duplicateCamp('${c.id}')">Duplicate</button><button class="btn" onclick="openCampForm('${c.id}')">${ICONS.edit} Edit</button><button class="btn" onclick="deleteCamp('${c.id}')">${ICONS.trash}</button></div>
+  </div>
+  <div class="tabs">${tabs.map(([k,l,n])=>`<button class="${state.tab===k?'active':''}" onclick="state.tab='${k}';render()">${l}${n!=null?`<span class="n">${n}</span>`:''}</button>`).join('')}</div>${body}`;
+}
+
+/* ============ Modals & forms ============ */
+let modalInitial='';
+function formSnapshot(){const f=$('#modal form');if(!f)return'';const fd=new FormData(f);return JSON.stringify([...fd.entries()])}
+function modalDirty(){return !!$('#modal form')&&formSnapshot()!==modalInitial}
+function openModal(html){$('#modal').innerHTML=html;$('#overlay').classList.add('open');modalInitial=formSnapshot();const f=$('#modal input:not([type=hidden]),#modal select');if(f)setTimeout(()=>f.focus(),50)}
+function closeModal(force){
+  if(!$('#overlay').classList.contains('open'))return;
+  if(!force&&modalDirty()&&!$('#campForm')&&!confirm('Discard your unsaved changes?'))return;
+  if($('#campForm')&&!force){/* camp form: keep a draft so nothing is lost */saveDraft()}
+  $('#overlay').classList.remove('open');$('#modal').innerHTML='';
+}
+// Clicking the dim background never closes the dialog (prevents accidental exits while dragging/selecting).
+// Only the ✕ button, Cancel, or Escape do — and Escape asks first if you've typed something.
+$('#overlay').addEventListener('mousedown',e=>{if(e.target.id==='overlay'){const m=$('#modal');m.style.transform='scale(1.015)';setTimeout(()=>m.style.transform='',120)}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#overlay').classList.contains('open')){if(modalDirty()&&!confirm('Close this form? Your typed values will be kept as a draft.'))return;closeModal()}});
+// Draft memory for the camp form
+function saveDraft(){const f=$('#campForm');if(!f||f.dataset.editing)return;const o=Object.fromEntries(new FormData(f).entries());o.published=f.elements.namedItem('published').checked;o._manual=f.elements.namedItem('emoji').dataset.manual||'';if(!o.name&&!o.description&&!o.location){return}store.set(DRAFT_KEY,JSON.stringify(o))}
+function clearDraft(){store.del(DRAFT_KEY)}
+function getDraft(){try{return JSON.parse(store.get(DRAFT_KEY))}catch(e){return null}}
+function discardDraft(){clearDraft();closeModal(true);openCampForm();toast('Draft discarded')}
+const field=(label,inner,full=false)=>`<div class="field ${full?'full':''}"><label>${label}</label>${inner}</div>`;
+const modalHeader=t=>`<header><h2>${t}</h2><button class="icon-btn" onclick="closeModal()" style="font-size:20px">✕</button></header>`;
+
+function openCampForm(id,presetGroup){
+  const draft=!id?getDraft():null;if(draft&&presetGroup)draft.groupId=presetGroup;
+  const c=id?DB.camps.find(x=>x.id===id):Object.assign({name:'',type:'Summer Camp',location:'',start:addDays(today(),14),end:addDays(today(),18),capacity:30,waitlistMax:null,price:0,ageMin:8,ageMax:14,color:COLORS[0],emoji:'🏕️',description:'',published:true,groupId:presetGroup||null},draft||{});
+  if(draft&&draft.waitlistMax==='')c.waitlistMax=null;
+  openModal(modalHeader(id?'Edit camp':'Create a new camp')+`<form class="content" id="campForm" ${id?'data-editing="1"':''} oninput="scheduleDraft()" onchange="scheduleDraft()" onsubmit="saveCamp(event,'${id||''}')">
+    ${draft?`<div class="draft-note">📝 Restored your unsaved draft. <a href="#" onclick="event.preventDefault();discardDraft()">Start fresh</a></div>`:''}
+    <input type="hidden" name="color" value="${c.color}"><input type="hidden" name="emoji" value="${c.emoji}" data-manual="${id||(draft&&draft._manual)?'1':''}">
+    <div class="form">
+      ${field('Camp name',`<input name="name" required placeholder="e.g. Pine Ridge Summer Camp" value="${esc(c.name)}" oninput="autoEmoji()">`,true)}
+      ${field('Type',`<select name="type" onchange="autoEmoji()">${TYPES.map(t=>`<option ${c.type===t?'selected':''}>${t}</option>`).join('')}</select>`)}
+      ${field('Business / camp group',`<select name="groupId"><option value="">— Independent (no group) —</option>${DB.groups.map(g=>`<option value="${g.id}" ${(c.groupId||'')===g.id?'selected':''}>${g.emoji} ${esc(g.name)}</option>`).join('')}</select>`)}
+      ${field('Location',`<input name="location" placeholder="City or venue" value="${esc(c.location)}">`)}
+      ${field('Start date',`<input type="date" name="start" required value="${c.start}">`)}
+      ${field('End date',`<input type="date" name="end" required value="${c.end}">`)}
+      ${field('Capacity',`<input type="number" name="capacity" min="1" required value="${c.capacity}">`)}
+      ${field('Max waitlist size',`<input type="number" name="waitlistMax" min="0" placeholder="Unlimited" value="${c.waitlistMax==null?'':c.waitlistMax}">`)}
+      ${field('Price per camper ($)',`<input type="number" name="price" min="0" step="1" value="${c.price}">`)}
+      ${field('Min age',`<input type="number" name="ageMin" min="0" value="${c.ageMin}">`)}
+      ${field('Max age',`<input type="number" name="ageMax" min="0" value="${c.ageMax}">`)}
+      ${field('Icon <span id="emojiHint" style="font-weight:500;text-transform:none;letter-spacing:0">· auto-picked from the name — click to override</span>',`<div class="emojis" id="emojiPicker">${EMOJIS.map(e=>`<span class="${c.emoji===e?'sel':''}" onclick="pick(this,'emoji','${e}')">${e}</span>`).join('')}</div>`,true)}
+      ${field('Color',`<div class="swatches">${COLORS.map(k=>`<span class="${c.color===k?'sel':''}" style="background:${k}" onclick="pick(this,'color','${k}')"></span>`).join('')}</div>`,true)}
+      ${field('Description',`<textarea name="description" placeholder="What makes this camp special?">${esc(c.description)}</textarea>`,true)}
+      <div class="field full"><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:14px;color:var(--ink)"><input type="checkbox" name="published" ${c.published?'checked':''} style="width:16px;height:16px;accent-color:var(--brand)">Published (visible on schedule and open for registration)</label></div>
+    </div>
+    <footer>${!id?`<span class="left sub" style="align-self:center">Draft saves automatically</span>`:''}<button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">${id?'Save changes':'Create camp'}</button></footer></form>`);
+}
+function scheduleDraft(){clearTimeout(scheduleDraft._t);scheduleDraft._t=setTimeout(saveDraft,300)}
+function pick(el,name,val){el.parentElement.querySelectorAll('span').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');const h=$(`#campForm [name=${name}]`);h.value=val;if(name==='emoji'){h.dataset.manual='1';const hint=$('#emojiHint');if(hint)hint.innerHTML='· custom &nbsp;<a href="#" onclick="event.preventDefault();$(\'#campForm [name=emoji]\').dataset.manual=\'\';autoEmoji()">use auto</a>'}}
+function autoEmoji(){const f=$('#campForm');if(!f)return;const h=f.querySelector('[name=emoji]');if(h.dataset.manual)return;const e=suggestEmoji(f.elements.namedItem('name').value,f.elements.namedItem('type').value);h.value=e;f.querySelectorAll('#emojiPicker span').forEach(s=>s.classList.toggle('sel',s.textContent===e));const hint=$('#emojiHint');if(hint)hint.textContent='· auto-picked from the name — click to override'}
+function saveCamp(e,id){
+  e.preventDefault();const f=new FormData(e.target);const o=Object.fromEntries(f.entries());
+  if(o.end<o.start){toast('End date must be after start date');return}
+  const data={name:o.name.trim(),type:o.type,groupId:o.groupId||null,location:o.location.trim()||'TBD',start:o.start,end:o.end,capacity:+o.capacity||1,waitlistMax:o.waitlistMax===''?null:Math.max(0,+o.waitlistMax||0),price:+o.price||0,ageMin:+o.ageMin||0,ageMax:+o.ageMax||0,color:o.color,emoji:o.emoji,description:o.description.trim(),published:f.has('published')};
+  if(id){const c=DB.camps.find(x=>x.id===id);Object.assign(c,data);const n=promoteWaitlist(c);toast(n?`Camp updated · ${n} camper${n>1?'s':''} joined from the waitlist`:'Camp updated');closeModal(true);render()}
+  else{const c={id:uid(),...data,code:genCode(allCodes()),campers:[],staff:[],activities:[],checklist:[],announcements:[]};DB.camps.push(c);grantAccess(c);clearDraft();closeModal(true);save();copyText(fmtCode(c.code)).then(ok=>showCreatedModal(c.id,ok))}
+}
+function copyText(txt){return (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>true).catch(()=>{try{const t=document.createElement('textarea');t.value=txt;t.style.cssText='position:fixed;opacity:0';document.body.appendChild(t);t.select();const ok=document.execCommand('copy');t.remove();return ok}catch(e){return false}})}
+function copyCode(id){const c=DB.camps.find(x=>x.id===id);copyText(fmtCode(c.code)).then(ok=>toast(ok?'Code copied to clipboard':'Could not copy — select the code manually'))}
+function lockCamp(id){const c=DB.camps.find(x=>x.id===id);if(!confirm(`Lock "${c.name}" on this device? You'll need the 16-digit code to open it again.`))return;revokeAccess(c);toast('Camp locked');go('camps')}
+function showCreatedModal(id,copied){const c=DB.camps.find(x=>x.id===id);
+  openModal(modalHeader('Camp created 🎉')+`<div class="content" style="text-align:center">
+    <div style="font-size:48px">${c.emoji}</div><h3 style="margin:6px 0 2px;font-size:20px">${esc(c.name)}</h3><p class="sub" style="margin:0 0 18px">Here's the access code for your Campusers</p>
+    <div class="code-display big" onclick="copyCode('${c.id}')" title="Click to copy">${fmtCode(c.code)}</div>
+    <p class="sub" style="margin:10px 0 0">${copied?'✅ Copied to your clipboard.':'Click the code to copy it.'} Anyone who enters this code under <b>Join camp</b> gets access. You can always find it on the camp's Overview.</p>
+    <footer style="justify-content:center"><button class="btn" onclick="copyCode('${c.id}')">📋 Copy again</button><button class="btn primary" onclick="closeModal(true);go('camp','${c.id}')">Open camp →</button></footer></div>`)}
+function showQRModal(id){const c=DB.camps.find(x=>x.id===id);const url=joinURL(c);const {svg}=makeQR(url,8,3);
+  openModal(modalHeader(`${ICONS.qr} QR code · ${esc(c.name)}`)+`<div class="content" style="text-align:center">
+    <div class="qr-wrap" id="qrWrap">${svg}</div>
+    <div class="code-display" style="margin:14px auto 6px;max-width:340px" onclick="copyCode('${c.id}')" title="Click to copy">${fmtCode(c.code)}</div>
+    <p class="sub" style="margin:0 0 6px">Scan to open Campuser with this camp's code pre-filled — the camper just taps <b>Join camp</b>.</p>
+    <p class="sub" style="margin:0;font-size:12px;word-break:break-all">${esc(url)}</p>
+    ${!isHosted()?`<div class="draft-note" style="margin-top:14px;text-align:left">⚠️ You're running Campuser locally (${esc(location.hostname||'file')}). The QR link will only work for other people once the site is published (e.g. on GitHub Pages). The code itself works anywhere.</div>`:''}
+    <footer style="justify-content:center;flex-wrap:wrap"><button class="btn" onclick="copyText(${JSON.stringify(url)}).then(ok=>toast(ok?'Link copied':'Could not copy'))">🔗 Copy link</button><button class="btn" onclick="downloadQR('${c.id}')">⬇️ Download PNG</button><button class="btn" onclick="printQR('${c.id}')">🖨️ Print poster</button><button class="btn primary" onclick="closeModal(true)">Done</button></footer></div>`)}
+function downloadQR(id){const c=DB.camps.find(x=>x.id===id);const {svg,size}=makeQR(joinURL(c),10,4);const img=new Image();const blob=new Blob([svg],{type:'image/svg+xml'});const u=URL.createObjectURL(blob);
+  img.onload=()=>{const cv=document.createElement('canvas');cv.width=size;cv.height=size+70;const x=cv.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);x.drawImage(img,0,0);x.fillStyle='#1f2a24';x.font='bold 22px monospace';x.textAlign='center';x.fillText(fmtCode(c.code),size/2,size+18);x.font='16px sans-serif';x.fillStyle='#6b7a72';x.fillText(c.name,size/2,size+48);
+    const a=document.createElement('a');a.download=`${c.name.replace(/[^\w]+/g,'-')}-qr.png`;a.href=cv.toDataURL('image/png');a.click();URL.revokeObjectURL(u);toast('QR code downloaded')};img.src=u}
+function printQR(id){const c=DB.camps.find(x=>x.id===id);const {svg}=makeQR(joinURL(c),10,4);const w=window.open('','_blank');if(!w){toast('Pop-up blocked — allow pop-ups to print');return}
+  w.document.write(`<!DOCTYPE html><html><head><title>${esc(c.name)} — Join</title><style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;text-align:center;padding:40px;color:#1f2a24}h1{font-size:34px;margin:0 0 4px}p{color:#6b7a72;margin:4px 0 24px}svg{width:min(70vw,480px);height:auto}.code{font-family:monospace;font-size:30px;font-weight:700;letter-spacing:3px;margin-top:20px}.s{font-size:14px;color:#6b7a72;margin-top:10px;word-break:break-all}.b{display:inline-block;background:${c.color};color:#fff;padding:6px 16px;border-radius:99px;font-weight:700;margin-bottom:16px}</style></head><body><div class="b">Campuser</div><h1>${c.emoji} ${esc(c.name)}</h1><p>${esc(c.location)} · ${fmt(c.start)} – ${fmt(c.end)}</p>${svg}<div class="code">${fmtCode(c.code)}</div><div class="s">Scan the QR code, or open ${esc(location.origin+location.pathname)} and tap <b>Join camp</b> to enter the code.</div></body></html>`);w.document.close();setTimeout(()=>{try{w.focus();w.print()}catch(e){}},300)}
+function showCodeModal(id){const c=DB.camps.find(x=>x.id===id);openModal(modalHeader('Invite code')+`<div class="content" style="text-align:center"><p class="sub" style="margin:0 0 14px">Share this code so others can join <b>${esc(c.name)}</b>.</p><div class="code-display big" onclick="copyCode('${c.id}')" title="Click to copy">${fmtCode(c.code)}</div><footer style="justify-content:center"><button class="btn primary" onclick="copyCode('${c.id}')">📋 Copy code</button><button class="btn" onclick="closeModal(true)">Done</button></footer></div>`)}
+
+/* ---- Join camp ---- */
+function openJoinModal(campId){const c=campId?DB.camps.find(x=>x.id===campId):null;
+  openModal(modalHeader(c?`Unlock ${esc(c.emoji+' '+c.name)}`:'Join a camp')+`<form class="content" onsubmit="joinCamp(event)" autocomplete="off">
+    <p class="sub" style="margin:0 0 14px">${c?'This camp is locked on this device.':'Ask the camp organizer for their access code.'} Enter the <b>16-digit code</b> to continue.</p>
+    <input class="code-input" name="code" inputmode="numeric" autocomplete="one-time-code" placeholder="0000-0000-0000-0000" maxlength="19" oninput="fmtCodeInput(this)" onpaste="setTimeout(()=>fmtCodeInput(this),0)" required>
+    <div id="joinErr" class="join-err" hidden></div>
+    <footer><button type="button" class="btn" onclick="closeModal(true)">Cancel</button><button class="btn primary" id="joinBtn" disabled>Join camp</button></footer></form>`)}
+function fmtCodeInput(el){const digits=cleanCode(el.value).slice(0,16);el.value=fmtCode(digits);el.setSelectionRange(el.value.length,el.value.length);const b=$('#joinBtn');if(b)b.disabled=digits.length!==16;const err=$('#joinErr');if(err)err.hidden=true}
+function joinCamp(e){e.preventDefault();const el=e.target.querySelector('.code-input');const code=cleanCode(el.value);const err=$('#joinErr');
+  if(code.length!==16){err.textContent='Please enter all 16 digits.';err.hidden=false;return}
+  const c=campByCode(code);
+  if(!c){err.textContent='No camp found with that code. Double-check the digits and try again.';err.hidden=false;el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake');return}
+  if(hasAccess(c)){closeModal(true);toast('You already have access');go('camp',c.id);return}
+  if(campFull(c)){closeModal(true);state.view='nospots';state.campId=c.id;document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));render();window.scrollTo(0,0);return}
+  grantAccess(c);closeModal(true);toast(`Welcome to ${c.name}! 🎉`);go('camp',c.id)}
+
+function deleteCamp(id){const c=DB.camps.find(x=>x.id===id);if(!confirm(`Move "${c.name}" to Recently deleted? You can restore it for 30 days.`))return;DB.camps=DB.camps.filter(x=>x.id!==id);c.deletedAt=new Date().toISOString();DB.trash.unshift(c);toast('Camp moved to Recently deleted');go('camps')}
+function restoreCamp(id){const c=DB.trash.find(x=>x.id===id);DB.trash=DB.trash.filter(x=>x.id!==id);delete c.deletedAt;DB.camps.push(c);toast('Camp restored');go('camp',id)}
+function purgeCamp(id){if(!confirm('Permanently delete this camp? This cannot be undone.'))return;DB.trash=DB.trash.filter(x=>x.id!==id);render()}
+function purgeOldTrash(){const cutoff=Date.now()-30*86400000;DB.trash=(DB.trash||[]).filter(c=>new Date(c.deletedAt).getTime()>cutoff)}
+function duplicateCamp(id){const c=DB.camps.find(x=>x.id===id);const n=JSON.parse(JSON.stringify(c));n.id=uid();n.code=genCode(allCodes());grantAccess(n);n.name=c.name+' (copy)';n.campers=[];n.published=false;n.activities.forEach(a=>a.id=uid());n.staff.forEach(a=>a.id=uid());(n.announcements||[]).forEach(a=>a.id=uid());n.checklist.forEach(a=>{a.id=uid();a.done=false});DB.camps.push(n);toast('Camp duplicated as draft');go('camp',n.id)}
+function togglePublish(id){const c=DB.camps.find(x=>x.id===id);c.published=!c.published;toast(c.published?'Camp published':'Camp moved to drafts');render()}
+
+function openCamperForm(cid,pid){
+  const c=DB.camps.find(x=>x.id===cid);const p=pid?c.campers.find(x=>x.id===pid):{name:'',age:'',guardian:'',contact:'',status:enrolled(c)>=c.capacity?'Waitlisted':'Registered',notes:''};
+  openModal(modalHeader(pid?'Edit camper':`Add camper to ${c.name}`)+`<form class="content" onsubmit="saveCamper(event,'${cid}','${pid||''}')"><div class="form">
+    ${field('Full name',`<input name="name" required value="${esc(p.name)}">`)}${field('Age',`<input type="number" name="age" min="0" value="${p.age}">`)}
+    ${field('Parent / guardian',`<input name="guardian" value="${esc(p.guardian)}">`)}${field('Contact (email or phone)',`<input name="contact" value="${esc(p.contact)}">`)}
+    ${field('Status',`<select name="status">${STATUSES.map(s=>`<option ${p.status===s?'selected':''}>${s}</option>`).join('')}</select>`)}
+    ${field('Notes (allergies, medical, etc.)',`<input name="notes" value="${esc(p.notes)}">`)}
+    ${!pid&&enrolled(c)>=c.capacity?(waitFull(c)?`<p class="sub full" style="color:var(--danger)">⛔ Camp and waitlist are both full (${waitlisted(c)}/${waitMax(c)} waitlisted). Only Cancelled entries can be added.</p>`:`<p class="sub full" style="color:var(--accent)">⚠️ This camp is full — new campers default to the waitlist${waitMax(c)!=null?` (${waitlisted(c)}/${waitMax(c)} spots used)`:''}.</p>`):''}
+    </div><footer>${pid?`<button type="button" class="btn danger left" onclick="closeModal(true);removeCamper('${cid}','${pid}')">Remove</button>`:''}<button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">${pid?'Save':'Add camper'}</button></footer></form>`);
+}
+function saveCamper(e,cid,pid){e.preventDefault();const o=Object.fromEntries(new FormData(e.target).entries());const c=DB.camps.find(x=>x.id===cid);const d={name:o.name.trim(),age:o.age?+o.age:'',guardian:o.guardian.trim(),contact:o.contact.trim(),status:o.status,notes:o.notes.trim()};
+  const prev=pid?c.campers.find(x=>x.id===pid).status:null;
+  if(d.status==='Waitlisted'&&prev!=='Waitlisted'&&waitFull(c)){toast(`Waitlist is full (max ${waitMax(c)})`);return}
+  let p;if(pid){p=c.campers.find(x=>x.id===pid);Object.assign(p,d)}else{p={id:uid(),...d};c.campers.push(p)}
+  stampWaitlist(p);const promoted=promoteWaitlist(c);closeModal(true);render();
+  if(p.status==='Waitlisted')showWaitlistModal(c.id,p.id);else if(promoted)toast(`${promoted} camper${promoted>1?'s':''} moved off the waitlist`);else toast(pid?'Camper updated':'Camper added')}
+function showWaitlistModal(cid,pid){const c=DB.camps.find(x=>x.id===cid);const p=c.campers.find(x=>x.id===pid);const pos=waitPos(c,p);const ord=n=>n+(['th','st','nd','rd'][(n%100-20)%10]||['th','st','nd','rd'][n%100]||'th');
+  openModal(modalHeader('On the waitlist ⏳')+`<div class="content" style="text-align:center"><div style="font-size:48px">${c.emoji}</div>
+    <h3 style="margin:6px 0 4px;font-size:20px">${esc(p.name)}, you are <span style="color:var(--accent)">${ord(pos)}</span> in line</h3>
+    <p class="sub" style="margin:0 0 6px">for <b>${esc(c.name)}</b>${waitMax(c)!=null?` · waitlist ${waitlisted(c)}/${waitMax(c)}`:''}</p>
+    ${pos===1?`<div class="wl-note first">🎯 You're first in line — <b>if a spot opens up, you will join the camp automatically.</b></div>`:`<div class="wl-note">You'll move up as campers ahead of you get in. The 1st person in line joins automatically when a spot opens.</div>`}
+    <footer style="justify-content:center"><button class="btn primary" onclick="closeModal(true)">Got it</button></footer></div>`)}
+function removeCamper(cid,pid){const c=DB.camps.find(x=>x.id===cid);const p=c.campers.find(x=>x.id===pid);if(!confirm(`Remove ${p.name} from this camp?`))return;c.campers=c.campers.filter(x=>x.id!==pid);const n=promoteWaitlist(c);toast(n?'Camper removed · next in line joined the camp':'Camper removed');render()}
+function setStatus(cid,pid,s){const c=DB.camps.find(x=>x.id===cid);const p=c.campers.find(x=>x.id===pid);if(s==='Waitlisted'&&p.status!=='Waitlisted'&&waitFull(c)){toast(`Waitlist is full (max ${waitMax(c)})`);render();return}p.status=s;stampWaitlist(p);const n=promoteWaitlist(c);toast(n&&s!=='Waitlisted'?`Status set to ${s} · next in line joined the camp`:`Status set to ${s}`);render()}
+
+function openActivityForm(cid,day,aid){
+  const c=DB.camps.find(x=>x.id===cid);const a=aid?c.activities.find(x=>x.id===aid):{day,time:'09:00',title:'',location:'',notes:''};
+  openModal(modalHeader(aid?'Edit activity':'Add activity')+`<form class="content" onsubmit="saveActivity(event,'${cid}','${aid||''}')"><div class="form">
+    ${field('Activity',`<input name="title" required placeholder="e.g. Canoeing 101" value="${esc(a.title)}">`,true)}
+    ${field('Day',`<select name="day">${Array.from({length:days(c)},(_,i)=>`<option value="${i+1}" ${a.day===i+1?'selected':''}>Day ${i+1} · ${fmtShort(addDays(c.start,i))}</option>`).join('')}</select>`)}
+    ${field('Time',`<input type="time" name="time" required value="${a.time}">`)}
+    ${field('Location',`<input name="location" value="${esc(a.location)}">`)}${field('Notes',`<input name="notes" value="${esc(a.notes)}">`)}
+    </div><footer><button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">${aid?'Save':'Add activity'}</button></footer></form>`);
+}
+function saveActivity(e,cid,aid){e.preventDefault();const o=Object.fromEntries(new FormData(e.target).entries());const c=DB.camps.find(x=>x.id===cid);const d={day:+o.day,time:o.time,title:o.title.trim(),location:o.location.trim(),notes:o.notes.trim()};
+  if(aid)Object.assign(c.activities.find(x=>x.id===aid),d);else c.activities.push({id:uid(),...d});toast('Schedule updated');closeModal(true);render()}
+function removeActivity(cid,aid){const c=DB.camps.find(x=>x.id===cid);c.activities=c.activities.filter(x=>x.id!==aid);render()}
+
+function openStaffForm(cid){openModal(modalHeader('Add staff member')+`<form class="content" onsubmit="saveStaff(event,'${cid}')"><div class="form">
+  ${field('Name',`<input name="name" required>`)}${field('Role',`<input name="role" list="roles" placeholder="Counselor, Lifeguard…" required><datalist id="roles"><option>Camp Director</option><option>Counselor</option><option>Lifeguard</option><option>Nurse</option><option>Instructor</option><option>Cook</option><option>Volunteer</option></datalist>`)}
+  ${field('Contact',`<input name="contact">`,true)}</div><footer><button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">Add</button></footer></form>`)}
+function saveStaff(e,cid){e.preventDefault();const o=Object.fromEntries(new FormData(e.target).entries());DB.camps.find(x=>x.id===cid).staff.push({id:uid(),name:o.name.trim(),role:o.role.trim(),contact:o.contact.trim()});toast('Staff added');closeModal(true);render()}
+function removeStaff(cid,sid){const c=DB.camps.find(x=>x.id===cid);c.staff=c.staff.filter(x=>x.id!==sid);render()}
+
+function openAnnouncementForm(cid,aid){
+  const c=DB.camps.find(x=>x.id===cid);const a=aid?ann(c).find(x=>x.id===aid):{title:'',body:'',link:'',linkLabel:'',pinned:false};
+  openModal(modalHeader(aid?'Edit announcement':'New announcement')+`<form class="content" onsubmit="saveAnnouncement(event,'${cid}','${aid||''}')"><div class="form">
+    ${field('Title',`<input name="title" required placeholder="e.g. Packing list is ready!" value="${esc(a.title)}">`,true)}
+    ${field('Message',`<textarea name="body" placeholder="Write your update… URLs are clickable automatically.">${esc(a.body)}</textarea>`,true)}
+    ${field('Link URL (optional)',`<input type="url" name="link" placeholder="https://…" value="${esc(a.link)}">`)}
+    ${field('Link label',`<input name="linkLabel" placeholder="e.g. Photo album" value="${esc(a.linkLabel)}">`)}
+    <div class="field full"><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:14px;color:var(--ink)"><input type="checkbox" name="pinned" ${a.pinned?'checked':''} style="width:16px;height:16px;accent-color:var(--brand)">Pin to top</label></div>
+    </div><footer><button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">${aid?'Save':'Post'}</button></footer></form>`);
+}
+function saveAnnouncement(e,cid,aid){e.preventDefault();const f=new FormData(e.target);const o=Object.fromEntries(f.entries());const c=DB.camps.find(x=>x.id===cid);
+  let link=o.link.trim();if(link&&!/^https?:\/\//i.test(link))link='https://'+link;
+  const d={title:o.title.trim(),body:o.body.trim(),link,linkLabel:o.linkLabel.trim(),pinned:f.has('pinned')};
+  if(aid){Object.assign(ann(c).find(x=>x.id===aid),d,{updatedAt:new Date().toISOString()});toast('Announcement updated')}else{ann(c).unshift({id:uid(),...d,createdAt:new Date().toISOString()});toast('Announcement posted 📣')}
+  closeModal(true);state.tab='announcements';render()}
+function removeAnnouncement(cid,aid){const c=DB.camps.find(x=>x.id===cid);if(!confirm('Delete this announcement?'))return;c.announcements=ann(c).filter(x=>x.id!==aid);toast('Announcement deleted');render()}
+function togglePin(cid,aid){const a=ann(DB.camps.find(x=>x.id===cid)).find(x=>x.id===aid);a.pinned=!a.pinned;render()}
+function copyAnnouncement(cid,aid){const c=DB.camps.find(x=>x.id===cid);const a=ann(c).find(x=>x.id===aid);const txt=`${c.name} — ${a.title}\n\n${a.body}${a.link?`\n\n${a.linkLabel?a.linkLabel+': ':''}${a.link}`:''}`;(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Copied to clipboard')).catch(()=>{prompt('Copy this text:',txt)})}
+
+function addCheck(cid,text){if(!text.trim())return;DB.camps.find(x=>x.id===cid).checklist.push({id:uid(),text:text.trim(),done:false});render()}
+function toggleCheck(cid,id){const x=DB.camps.find(c=>c.id===cid).checklist.find(i=>i.id===id);x.done=!x.done;render()}
+function removeCheck(cid,id){const c=DB.camps.find(x=>x.id===cid);c.checklist=c.checklist.filter(i=>i.id!==id);render()}
+
+/* ============ Import / export ============ */
+function exportData(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(DB,null,2));a.download=`campuser-backup-${today()}.json`;a.click();toast('Backup downloaded')}
+function importData(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.camps))throw 0;DB=normalize(d);DB.camps.forEach(grantAccess);save();toast('Data imported');go('dashboard')}catch(e){toast('Invalid backup file')}};r.readAsText(f);input.value=''}
+function resetData(){if(!confirm('Delete ALL camps and data? This cannot be undone.'))return;DB=normalize(seed());ACCESS=new Set();saveAccess();clearDraft();save._last=null;save();toast('All data cleared');go('dashboard')}
+
+render();
+function handleHash(){const m=location.hash.match(/#join=(\d{16})/);if(!m)return;history.replaceState(null,'',location.pathname+location.search);const code=m[1];const c=campByCode(code);
+  if(c&&hasAccess(c)){go('camp',c.id);return}
+  openJoinModal(c?c.id:null);const inp=$('.code-input');if(inp){inp.value=code;fmtCodeInput(inp)}
+  if(c){setTimeout(()=>$('#modal form')?.requestSubmit?.(),250)}else{const err=$('#joinErr');if(err){err.textContent='This QR code belongs to a camp that isn\'t stored in this browser yet. Ask the organizer to share their camp (Export → Import) or open the link on their site.';err.hidden=false}}}
+window.addEventListener('hashchange',handleHash);handleHash();
+</script>
+</body>
+</html>
