@@ -1,5 +1,5 @@
 /* Campuser service worker — offline support + installability */
-const VERSION = 'campuser-v1';
+const VERSION = 'campuser-v2';
 const PRECACHE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './favicon.ico', './logo.svg'];
 
 self.addEventListener('install', e => {
