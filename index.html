@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Campuser — Create & Manage Camps</title>
+<meta name="description" content="Campuser: create and manage camps — rosters, waitlists, schedules, staff, announcements, join codes and QR codes.">
+<meta name="theme-color" content="#1d3b2e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Campuser">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CiAgPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiByeD0iMTQiIGZpbGw9IiMxZDNiMmUiLz4KICA8Y2lyY2xlIGN4PSI0OSIgY3k9IjE1IiByPSI0LjUiIGZpbGw9IiNmZmYiIG9wYWNpdHk9Ii45Ii8+CiAgPGNpcmNsZSBjeD0iNTEiIGN5PSIxMy41IiByPSIzLjYiIGZpbGw9IiMxZDNiMmUiLz4KICA8cGF0aCBkPSJNMzIgMTEgNiA1M2g1MkwzMiAxMVoiIGZpbGw9IiNmMmEzM2EiLz4KICA8cGF0aCBkPSJNMzIgMjUgMTkuNSA1M2gyNUwzMiAyNVoiIGZpbGw9IiMxZDNiMmUiLz4KICA8cGF0aCBkPSJNMzIgMTEgNiA1M2g3LjJMMzIgMjIuNCA1MC44IDUzSDU4TDMyIDExWiIgZmlsbD0iI2ZmZiIvPgogIDxwYXRoIGQ9Ik0yNyA1M2MwLTUgNS04IDUtOHM1IDMgNSA4IiBmaWxsPSIjZjJhMzNhIi8+Cjwvc3ZnPg==">
+<link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgEAYAAAAj6qa3AAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAGYktHRAAAAAAAAPlDu38AAAAJcEhZcwAAAYAAAAGAAB/kyyIAAAAHdElNRQfqCRYABx/BIGNEAAANXklEQVRo3tWZeVxV1fqHn7XP4XCYJ1NAFFDMwHkIZ3FCk5xzINFU1BLtl+bVSutWVnZLU2+lmYpl5YhXc6IcUVNQTPNqCgiKCSo5ACIIHDhnrfvHPgg29ylv9/f+83DY79p7vd+93/Wu/W6B3erV69SpefOqX0zWEdZR53hnnVHtdQZt1Gl+hv8pq1ir83JdnXuP64y/rPP4WJ2qZW5ucvLp0yDuDVzbpHOYm85Xu+p8yC4Atr86xN9pqTpyCnS+ZY9r5Qq7YJ8a7/UfPlHnBw46vb7/fxp4lbXTUd/+8518nQ4XdL4/XdP/aOKr8+XNPwj8f9fKsVAO5FNIwW8d5Oyj83n7k911nl2AWHuuh0687xN3xxVXkJnKUSmQi9RRuQ9wxRmXXxjnhBknUBEqWvUHVab8lStoLiJFuwyUUU7Zb52E/5s6n95nFyAq2X4k874F7oARI8jH5XK5EPx2PZD0QHcIWu4/P6ALyAg5R04DHDHh+OPhqquKVv3AZaGzyWULDIjslfNILNTFd4pvOch96nuZ9nsn1SvBLkCQz30LvCqAT9Q2tQ2MzsaOBj+Y8u0obdwAeGH9pAefeQacg5zGOMWB6qBGqhGAQCDQH3ULqAdUW9UYhqzpc/LROfDIjIi0ngJuXC34Z0EciIOsE9uoTg2JRP7arDzj7QKYz963yM044ghymNws34TOa1vnhLeFId/22TNgBvQ+2HVmz70Q1SNiSY+jIN1khHQDJApAZXCBTDB2N24xFkKrY2GDmgWCT6XnTO8F4LzfaYaTEayNbQm26ehPmgMQQTs6/boQ2n0LXENDA5morqtc8GnvWdfzBZh8eVRGbDG4b3Dr4X4STIMc0kyb4KnMkS+OTYbArf7X6x4C6SFHyigQD9GQRmBtbdtuexHSDRdmZPpCyDuBZ4IvwkuxU7Tp/vB47f49h8RCK7+wJc0mAbcp4TZQ+strw/0T4Ao3uAnkqoNqAQyfENVuYHdoP6b1rnC3H7uHxoQce2gsjPMYujZ6Phj2GMoNaaB2qSPqKIhmNCYU/nX7S//tveDT4s3TNpjAO8GzpVdPaJQfZGrwIFxrfLPljYsgN6tMdZRfXVztGyGl/rTAHTFhAluc/Nq2FZp6NOrdeCms7PHWm+/th4Bgv8Z1DwNgowJQKCQgMGKGWxNum24NgjjXl5b9rS98tflrx9RzYKhlWGc4CeqKclGVIA6KueJjcCowJzn1AMtgywjLFbDulqFWC2iPiyZaBFBCKXf+G0+A0KGGqenqWXDq5Bhv/gSeeuLx4WOy7wlc9/u2eFPul6Dm34o8H179f8949wrPLTD55qjTsefBK9XjkkdrkAdUsboJwlnkiVJQDehGGyhNKgsofQNsZ1R9mwRtoGiohf964PdDAAMGkCnSJM9An4IuW7p9DlG+3VpGTq3pKFXlJrjmdXzqqutw+fXDg5fMAbA632lT7dXx5bbvtjfBsPi+6/ovAuaoaaoLcJ0CCkGEEEgwiOVirlgIog1NRQt+4+r/ZwpgtAfeTv5dToO6B3wn+NaHSYaR08buBnO+ubFTjTusXr2alNIYtt7ZF7xnP3zmt+fplHfBOvqix+5L1X6GBzVpmAvjZgxTMZ0hNKvh+hAb2FbIElsWd1Ptj9ofFkDt45j6GrSPNLP2HYxJG/z58HHQrPdDtZvuqeG4u/z1/DS4dumE7+p82P7V2TVFDpDYJ3N32Va4OPVY3LoTQELxrJzR1cPqO/l/W+9dePLj6PVP+IO5vemgYxKoieoV9fJfKUBVfR9k2yTfgnBbc9lSg+jA/t6PWQAIZhhQzAFmg+3W+Zbb2kDy5lMtTj8H6cvyj3ALclcWPy8ehr3zTnlmt4DKsIxzG4KAvaqWNaf6cv0Cetzs0w0iszpd6XoY5Bp5Q+4FjPa6/18TwL5DU7dUgPIFjzluRW5NYXLKqE9i3wMfF69gH/dqd/l1/hdpjaBoatq8z7vCttrnRlZ0gPITVm++ANs0eYjLkJh5PtV6Hq4VpU3fFQXyhTztWFz1eZzKnGo5R0DcBzGXxgWCv3PtwjqLQQ6U78m5gEFPxfsvQDGllIEqVhUqGYbM710StRq6auHLO3Wr4RdnzSvvCrYx6fvXDIOTpy7m5UXDsZ1X4+XToPUV9agPWi+tLkGQ1v+mSb0NyYHZK24lgZW0VqufA5VjaX4rsvq0LUaEXWi+DkbHDX5qqAU0TXtTiwF1hFOcvp8CmHDAAWx7pZeshEbvBZ0NNsL4p0Z8PPoSGHsbDcaEanfrnZxd+69BmcelQ8kPw46orGdlEtzuazlJKIg0MQlXEBNohQNYFlhHshC2T8lqKO9AUfzlnacOg3Xx+VXbP6sxj5G8yF4YmTxg9rCZ0PZi09Dm3iCH2rbZFnE3Nf90AdTLaolaDI4bHJ51GA8TG48YOOp9CH6iXkrQsRp+g+745r0B1k4ZT68zQWbqjS2liXBwSc5BmwbiQ3GE2tzd62PVi5Y2VDQkGI73y8uyDYR/j/++e2Ux2Aqz1m/+HOS0gpLMMdXXqbXM+41aiyDuHzGjx3UA93DXDFdHUA6quQqj+mXqDwtgwgETyNkyVa6E7tHtz3ScDQPHR+6L6lLDL0NdkZ9BxfyM9H95grV7wXNZx2FnZPZTUsH12Du31Q7QosV6av34MuKQGIsLFD9viaUjbC/J8rJ1gvLFtzfkOULF6PTQtQHAP2xrLP+uHtctoMPULuEwaFWv3o+cBblBJcn5QCkWKv6IAAb7y8zzMlEmQJ2BtT6sFQST+8VMi00AlyznFFe/anfbwWvOJ8+CbUe20xcb4UpR8WW1A3bXunDFFgLkU4ay3xlAlijIAdvHKp1sUBcpRIJIEdn4wyFy2tkWQWZyQUO2gjTnHj74JFi/z63zVd3q6zq4GLc7TIEJM6Nfe+IEhKypHxbUFWynZSPpCTjoqfu7BVBnuEA2CH9xSCyGmIwBIY/NhdapzbJbna/hGFJRUCKg4nZa/dVNgZOWxMJXIGnTd35yDHwXVjRDtgHxjcjBH+Qi9Sg3oMnxB8ZrL0Dbzn5ztKJqgYRZzMEDrh8q/USdgC+jzw+0zgb5TmV5mQ9UNE67sfYoqNdLZ16v0ZNuOCvwowaHYULI8Ckxy8F03GGHcRWoBWqVWvV7BKiq7+NtB22fQKtRoQ2aZMGocYN3DD8KIkCEiher3St7XpyxswnI1d+3OV4KBVvLvbQ+kJiS1bNyL9g0OY+zoFqpelyFtuv9OhiuwcKQyGvmEvjniN5WJx/o+VrQLMN+UF+pCRSA6EkQRtgTmD3K6gu5C4q9xFJQAYV/P3cGKpdlpm5uCuQxWL1dPZ9Bg/s82c8GEe3DVYf5ICfJvXIRP9tpqhagqr43UlGqD7g2dQ5w7gCTrsekjl0AdUbVKqpT/d0AmV6087tHoGJoRklCdxApytNaDilcPmPzhLSIm/FyLYh6Yj6e4LPD6WMRANMz2n9gmgwNYryOaIVQ5zXXF8VjMD2p/duOcRDo7dFUHADccUTApeTbXVQ/2Bd90WgdAGIpAayEyvzz1u0XwFZ+fd5p1+p5uXm7pLl1g8krYhJiz8IDe7wjfHaCXKhS5X7u9il+IEBFb/K5xS1QL6ipqg8MInJp3xCInNs5ssej9yRHPWtLkMPPJa4fD4ZXSp7LLYSyG9YY0R+2RWQ6Vq4AyzvW0SwB2VQFqKsQ3sNfGIDWBt8phlPAZwzEGUQ+M3CHBz/0Pqc1g243A8ONy0GlqjgKQH4gT3MBEieef896DAosZfvoCIYtlqX5cSCHpbuu2QrkWieU1mjyP/xci3ZtYmH0oUEnhvYArYtI0laCOkEaNXqH9iG5G1S82qQSGuI03Oxp7gfundxc3L3g83O7wxJXgJynElQZyBV3Ol67CZUyvcXOYmCj9VnrLMhLKXFgCBzvm1fHtgQ0PxFFA1BDeF34QElw5Sz1LGz6KGNmpS+o19QY8rlbDrXmooxAuFlQ1kZtBC1YbCQQaCdq4wTnCvInyW9gWeg3RypaQqPV3tnaEyDjz8Ulfwem4Nx5S8+B5uG5sOFgEItEInfA0MyYbvwU3K66bHZ9CG5PKXmmeBKA2C0OlJyyN0SWGaigksonrYxlKI8DjQihGShUPWUGzDjjDljYQxzgRldeBdxFhHgNeEMdoAiYLTrjCOIZHsYE2Oz13hMzAtRbJGMBLD/42GKv2eJvtMcEVLVo7PsEtZMLWIHH1EZKgXmiN25AmUpT64FC1hIJmOnPOqCUOxSDOCuSxCkgjGDqAy/xDm9UrXU7W9oFeNg+mY0TUShU4EpKKaMMvWNzb79Is++5DfcsKgZ7Ojlh/MkNSIU94Iq7kvy0OdjP4/gz57FgRQGVP3rrt9nrvsR6j7B64XXCjLlqDcgv1Q+O62xPga9H6py3Vx8wfzouOOPs3IQ/y0x22UwYfssO7WetShjHnzx2L39k1id1Ljmp88vIqmVjg474YToNITpn2ZcLv7A/TYi/xAof0fn+AZ3zrtkF8bx7L37wlXi9zi77df5fpc5e2To99v/VIf2y3bHP//BYnYuX69yVrrPyrarP4/8BOgN2F18Pd6oAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMDktMjJUMDA6MDc6MzErMDA6MDA5lgMlAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTA5LTIyVDAwOjA3OjMxKzAwOjAwSMu7mQAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyNi0wOS0yMlQwMDowNzozMSswMDowMB/emkYAAAAASUVORK5CYII=">
+<link rel="alternate icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:title" content="Campuser"><meta property="og:description" content="Create and manage camps"><meta property="og:image" content="https://coder386galaxy.github.io/campuser/icon-512.png">
 <style>
   :root{
     --bg:#f4f6f3; --panel:#ffffff; --ink:#1f2a24; --muted:#6b7a72; --line:#e3e8e4;
@@ -20,7 +30,7 @@
   /* Sidebar */
   .sidebar{width:240px;background:#1d3b2e;color:#dfeee6;display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh;flex-shrink:0}
   .logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:22px;letter-spacing:-.3px;color:#fff;padding:4px 8px 22px}
-  .logo svg{width:32px;height:32px}
+  .logo svg{width:36px;height:36px;border-radius:9px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
   .nav button{display:flex;align-items:center;gap:12px;width:100%;background:none;border:0;color:#c6dccf;padding:11px 12px;border-radius:10px;font-size:15px;text-align:left;margin-bottom:4px}
   .nav button:hover{background:rgba(255,255,255,.08);color:#fff}
   .nav button.active{background:var(--brand);color:#fff;font-weight:600}
@@ -251,7 +261,15 @@
 
 <aside class="sidebar" id="sidebar">
   <div class="logo">
-    <svg viewBox="0 0 32 32" fill="none"><path d="M16 4 3 27h26L16 4Z" fill="#f2a33a"/><path d="M16 12 9.5 27h13L16 12Z" fill="#1d3b2e"/><path d="M16 4 3 27h4L16 11l9 16h4L16 4Z" fill="#fff"/></svg>
+    <svg viewBox="0 0 64 64" class="logo-mark">
+  <rect width="64" height="64" rx="14" fill="#1d3b2e"/>
+  <circle cx="49" cy="15" r="4.5" fill="#fff" opacity=".9"/>
+  <circle cx="51" cy="13.5" r="3.6" fill="#1d3b2e"/>
+  <path d="M32 11 6 53h52L32 11Z" fill="#f2a33a"/>
+  <path d="M32 25 19.5 53h25L32 25Z" fill="#1d3b2e"/>
+  <path d="M32 11 6 53h7.2L32 22.4 50.8 53H58L32 11Z" fill="#fff"/>
+  <path d="M27 53c0-5 5-8 5-8s5 3 5 8" fill="#f2a33a"/>
+</svg>
     Campuser
   </div>
   <nav class="nav">
@@ -2611,6 +2629,7 @@ function parse(v){try{const d=JSON.parse(v);if(d&&Array.isArray(d.camps))return 
 /* --- 16-digit access codes --- */
 const ACCESS_KEY='campuser.access';   // camps you've unlocked — permanent, not tied to data version
 const CODES_KEY='campuser.codes';     // permanent registry: code -> {id,name,emoji}
+const GROUPS_KEY='campuser.groups';   // permanent registry of groups + which camps belong to them
 function genCode(existing=new Set()){let code;do{const a=new Uint32Array(4);(window.crypto||{}).getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*4294967296);code=Array.from(a,n=>String(n%10000).padStart(4,'0')).join('')}while(existing.has(code)||code[0]==='0');return code}
 function allCodes(d=DB){return new Set([...d.camps,...(d.trash||[])].map(c=>c.code).filter(Boolean))}
 const fmtCode=c=>String(c||'').replace(/\D/g,'').slice(0,16).replace(/(\d{4})(?=\d)/g,'$1-');
@@ -2620,6 +2639,11 @@ function saveAccess(){store.set(ACCESS_KEY,JSON.stringify([...ACCESS]))}
 let CODES={};try{CODES=JSON.parse(store.get(CODES_KEY)||'{}')||{}}catch(e){}
 function rememberCode(c){if(!c||!c.code)return;CODES[c.code]={id:c.id,name:c.name,emoji:c.emoji};store.set(CODES_KEY,JSON.stringify(CODES))}
 function rememberAllCodes(){[...DB.camps,...(DB.trash||[])].forEach(rememberCode)}
+let GROUPMEM={};try{GROUPMEM=JSON.parse(store.get(GROUPS_KEY)||'{}')||{}}catch(e){}
+function rememberGroups(){(DB.groups||[]).forEach(g=>{GROUPMEM[g.id]={...g,campIds:[...DB.camps,...(DB.trash||[])].filter(c=>c.groupId===g.id).map(c=>c.id),lastSeen:new Date().toISOString()}});(DB.groupTrash||[]).forEach(g=>{if(GROUPMEM[g.id])GROUPMEM[g.id].deletedAt=g.deletedAt});store.set(GROUPS_KEY,JSON.stringify(GROUPMEM))}
+function recoverGroups(d){/* rebuild groups/membership from the registry if data lost them */const have=new Set(d.groups.map(g=>g.id));let n=0;
+  for(const id in GROUPMEM){const m=GROUPMEM[id];if(have.has(id)||(d.groupTrash||[]).some(g=>g.id===id))continue;const members=d.camps.filter(c=>(m.campIds||[]).includes(c.id)||c.groupId===id);if(!members.length&&!d.camps.some(c=>c.groupId===id))continue;const {campIds,lastSeen,deletedAt,...g}=m;if(deletedAt)continue;d.groups.push(g);members.forEach(c=>c.groupId=id);have.add(id);n++}
+  d.camps.forEach(c=>{if(!c.groupId){for(const id in GROUPMEM)if(have.has(id)&&(GROUPMEM[id].campIds||[]).includes(c.id)&&!c._ungrouped){c.groupId=id}}});return n}
 function campByCode(code){let c=DB.camps.find(x=>x.code===code);if(c)return c;const r=CODES[code];if(r){c=DB.camps.find(x=>x.id===r.id);if(c){c.code=code;return c}}return null}
 const groupOf=c=>c&&c.groupId?DB.groups.find(g=>g.id===c.groupId):null;
 const groupCamps=g=>DB.camps.filter(c=>c.groupId===g.id);
@@ -2638,13 +2662,13 @@ function grantAccess(c){ACCESS.add(c.id);saveAccess()}
 function revokeAccess(c){ACCESS.delete(c.id);saveAccess()}
 const myCamps=()=>DB.camps.filter(hasAccess);
 function knownCodeFor(id){for(const k in CODES)if(CODES[k].id===id)return k;return null}
-function normalize(d){d.groups||(d.groups=[]);d.groups.forEach(g=>{g.emoji||(g.emoji='🏢');g.color||(g.color=COLORS[1]);g.description||(g.description='');g.website||(g.website='');g.contact||(g.contact='')});const gids=new Set(d.groups.map(g=>g.id));const codes=new Set();d.camps.forEach(c=>{c.campers||(c.campers=[]);c.staff||(c.staff=[]);c.activities||(c.activities=[]);c.checklist||(c.checklist=[]);c.announcements||(c.announcements=[]);if(c.groupId&&!gids.has(c.groupId))c.groupId=null;if(!c.code){c.code=knownCodeFor(c.id)||genCode(codes);if(!knownCodeFor(c.id))c._legacy=true}codes.add(c.code)});d.trash||(d.trash=[]);d.trash.forEach(c=>{if(!c.code)c.code=genCode(codes);codes.add(c.code)});return d}
+function normalize(d){d.groups||(d.groups=[]);d.groupTrash||(d.groupTrash=[]);recoverGroups(d);d.groups.forEach(g=>{g.emoji||(g.emoji='🏢');g.color||(g.color=COLORS[1]);g.description||(g.description='');g.website||(g.website='');g.contact||(g.contact='')});const gids=new Set(d.groups.map(g=>g.id));const codes=new Set();d.camps.forEach(c=>{c.campers||(c.campers=[]);c.staff||(c.staff=[]);c.activities||(c.activities=[]);c.checklist||(c.checklist=[]);c.announcements||(c.announcements=[]);if(c.groupId&&!gids.has(c.groupId))c.groupId=null;if(!c.code){c.code=knownCodeFor(c.id)||genCode(codes);if(!knownCodeFor(c.id))c._legacy=true}codes.add(c.code)});d.trash||(d.trash=[]);d.trash.forEach(c=>{if(!c.code)c.code=genCode(codes);codes.add(c.code)});return d}
 let DB=load();
 DB.camps.forEach(c=>{if(c._legacy){delete c._legacy;grantAccess(c)}});rememberAllCodes();
 function load(){return normalize(parse(store.get(KEY))||parse(store.get(BACKUP_KEY))||seed())}
 let lastSaved=null,saveTimer=null;
 function save(){
-  rememberAllCodes();
+  rememberAllCodes();rememberGroups();
   const json=JSON.stringify(DB);
   if(json===save._last)return;
   const prev=store.get(KEY);if(prev&&prev!==json)store.set(BACKUP_KEY,prev);
@@ -2653,6 +2677,7 @@ function save(){
 function updateSaveBadge(){const b=document.getElementById('saveBadge');if(!b||!lastSaved)return;b.textContent='✓ Saved '+lastSaved.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}
 // If localStorage was unavailable at boot but IndexedDB has newer data, recover it
 idb.get(ACCESS_KEY).then(v=>{try{const a=JSON.parse(v||'[]');if(a.length&&!store.get(ACCESS_KEY)){ACCESS=new Set(a);saveAccess();render()}}catch(e){}});
+idb.get(GROUPS_KEY).then(v=>{try{const g=JSON.parse(v||'{}');if(Object.keys(g).length&&!store.get(GROUPS_KEY)){GROUPMEM=g;store.set(GROUPS_KEY,JSON.stringify(GROUPMEM));if(recoverGroups(DB)){save._last=null;render()}}}catch(e){}});
 idb.get(CODES_KEY).then(v=>{try{const c=JSON.parse(v||'{}');if(Object.keys(c).length&&!store.get(CODES_KEY)){CODES=c;store.set(CODES_KEY,JSON.stringify(CODES))}}catch(e){}});
 idb.get(KEY).then(v=>{const d=parse(v);if(d&&!parse(store.get(KEY))&&(d.camps.length||d.trash?.length)){DB=normalize(d);save._last=null;render();toast('Recovered your camps from device storage')}});
 // Persist when the tab is hidden/closed and keep tabs in sync
@@ -2700,11 +2725,15 @@ const ICONS={
 };
 
 /* ============ Routing ============ */
+const STATE_KEY='campuser.lastView';
 let state={view:'dashboard',campId:null,groupId:null,tab:'overview',q:'',filter:'all',sort:'start',groupFilter:'all'};
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{go(b.dataset.view);$('#sidebar').classList.remove('open')});
 function go(view,campId=null){if(view==='group'){state.groupId=campId;campId=null}if(view==='camp'){const c=DB.camps.find(x=>x.id===campId);if(c&&!hasAccess(c)){openJoinModal(c.id);return}}state.view=view;state.campId=campId;if(view==='camp')state.tab='overview';document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view||(view==='camp'&&b.dataset.view==='camps')||(view==='group'&&b.dataset.view==='groups')));render();window.scrollTo(0,0)}
+function updateTitle(){let t='Campuser';const v=state.view;if(v==='camp'){const c=DB.camps.find(x=>x.id===state.campId);if(c)t=`${c.emoji} ${c.name} · Campuser`}else if(v==='group'){const g=DB.groups.find(x=>x.id===state.groupId);if(g)t=`${g.emoji} ${g.name} · Campuser`}else if(v!=='dashboard')t={camps:'Camps',groups:'Groups',campers:'Campers',schedule:'Schedule',nospots:'No spots remaining'}[v]+' · Campuser';document.title=t}
+function rememberView(){try{store.set(STATE_KEY,JSON.stringify({view:state.view,campId:state.campId,groupId:state.groupId,tab:state.tab,groupFilter:state.groupFilter}))}catch(e){}}
+function restoreView(){try{const v=JSON.parse(store.get(STATE_KEY)||'null');if(!v)return;if(v.view==='group'&&DB.groups.some(g=>g.id===v.groupId)){state.view='group';state.groupId=v.groupId}else if(v.view==='camp'&&DB.camps.some(c=>c.id===v.campId&&hasAccess(c))){state.view='camp';state.campId=v.campId;state.tab=v.tab||'overview'}else if(['camps','groups','campers','schedule'].includes(v.view))state.view=v.view;if(v.groupFilter&&(v.groupFilter==='all'||v.groupFilter==='none'||DB.groups.some(g=>g.id===v.groupFilter)))state.groupFilter=v.groupFilter;document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===state.view||(state.view==='camp'&&b.dataset.view==='camps')||(state.view==='group'&&b.dataset.view==='groups')))}catch(e){}}
 function render(){
-  purgeOldTrash();
+  purgeOldTrash();updateTitle();rememberView();
   const m=$('#main');
   if(state.view==='dashboard')m.innerHTML=Dashboard();
   else if(state.view==='camps')m.innerHTML=Camps();
@@ -2830,7 +2859,8 @@ function Groups(){
   const list=DB.groups.filter(g=>!q||g.name.toLowerCase().includes(q)||(g.description||'').toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
   return topbar('Businesses & camp groups',`${DB.groups.length} group${DB.groups.length===1?'':'s'} · organize camps under one organization`,`<button class="btn primary" onclick="openGroupForm()">${ICONS.plus} New group</button>`)+
   `<div class="toolbar"><div class="search">${ICONS.search}<input placeholder="Search groups…" value="${esc(state.q)}" oninput="state.q=this.value;renderKeepFocus(this)"></div></div>
-  ${list.length?`<div class="camps">${list.map(GroupCard).join('')}</div>`:`<div class="empty"><div class="big">🏢</div><p>${DB.groups.length?'No groups match your search.':'No groups yet. Create a business or camp group, then add camps to it — like "Sunny Days Youth Org" with its summer, spring and sports camps.'}</p><button class="btn primary" onclick="openGroupForm()">${ICONS.plus} Create your first group</button></div>`}`;
+  ${list.length?`<div class="camps">${list.map(GroupCard).join('')}</div>`:`<div class="empty"><div class="big">🏢</div><p>${DB.groups.length?'No groups match your search.':'No groups yet. Create a business or camp group, then add camps to it — like "Sunny Days Youth Org" with its summer, spring and sports camps.'}</p><button class="btn primary" onclick="openGroupForm()">${ICONS.plus} Create your first group</button></div>`}
+  ${DB.groupTrash.length?`<details class="trash"><summary>🗑️ Recently deleted groups (${DB.groupTrash.length})</summary><ul class="ul">${DB.groupTrash.map(g=>`<li style="cursor:default"><div class="date" style="background:${g.color};font-size:22px">${g.emoji}</div><div class="info"><div>${esc(g.name)}</div><small>Deleted ${fmt(g.deletedAt.slice(0,10))} · remembers ${(g.memberIds||[]).length} camp${(g.memberIds||[]).length===1?'':'s'}</small></div><button class="btn sm" onclick="restoreGroup('${g.id}')">Restore</button><button class="btn sm danger" onclick="purgeGroup('${g.id}')">Delete forever</button></li>`).join('')}</ul></details>`:''}`;
 }
 function GroupCard(g){
   const cs=groupCamps(g),mine=cs.filter(hasAccess),camp=cs.reduce((s,c)=>s+enrolled(c),0),cap=cs.reduce((s,c)=>s+c.capacity,0),active=cs.filter(c=>campStatus(c)==='active').length,up=cs.filter(c=>campStatus(c)==='upcoming').length;
@@ -2854,7 +2884,7 @@ function GroupDetail(){
   return`<button class="back" onclick="go('groups')">${ICONS.back} All groups</button>
   <div class="hero" style="background:linear-gradient(135deg,${g.color},${g.color}cc)">
     <div><span class="pill" style="background:rgba(255,255,255,.22);color:#fff">Business / camp group</span><h1><span style="font-size:36px">${g.emoji}</span>${esc(g.name)}</h1>
-    <div class="meta">${g.website?`<a href="${esc(/^https?:/i.test(g.website)?g.website:'https://'+g.website)}" target="_blank" rel="noopener" style="color:#fff">🌐 ${esc(g.website.replace(/^https?:\/\//,''))}</a>`:''}${g.contact?`<span>✉️ ${esc(g.contact)}</span>`:''}<span>${cs.length} camp${cs.length===1?'':'s'}</span></div></div>
+    <div class="meta">${g.website?`<a href="${esc(/^https?:/i.test(g.website)?g.website:'https://'+g.website)}" target="_blank" rel="noopener" style="color:#fff">🌐 ${esc(g.website.replace(/^https?:\/\//,''))}</a>`:''}${g.contact?`<span>✉️ ${esc(g.contact)}</span>`:''}<span>${cs.length} camp${cs.length===1?'':'s'}</span>${g.createdAt?`<span>Since ${fmt(g.createdAt.slice(0,10))}</span>`:''}</div></div>
     <div class="actions"><button class="btn" onclick="openCampForm(null,'${g.id}')">${ICONS.plus} New camp in group</button>${unassigned.length?`<button class="btn" onclick="openAssignModal('${g.id}')">Add existing camps</button>`:''}<button class="btn" onclick="openGroupForm('${g.id}')">${ICONS.edit} Edit</button><button class="btn" onclick="deleteGroup('${g.id}')">${ICONS.trash}</button></div>
   </div>
   <div class="stats">
@@ -2883,11 +2913,14 @@ function openGroupForm(id){
 function pickG(el,name,val){el.parentElement.querySelectorAll('span').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');$(`#groupForm [name=${name}]`).value=val}
 function saveGroup(e,id){e.preventDefault();const o=Object.fromEntries(new FormData(e.target).entries());const d={name:o.name.trim(),emoji:o.emoji,color:o.color,description:o.description.trim(),website:o.website.trim(),contact:o.contact.trim()};
   if(id){Object.assign(DB.groups.find(x=>x.id===id),d);toast('Group updated');closeModal(true);render()}else{const g={id:uid(),...d,createdAt:new Date().toISOString()};DB.groups.push(g);toast('Group created 🎉');closeModal(true);go('group',g.id)}}
-function deleteGroup(id){const g=DB.groups.find(x=>x.id===id);const n=groupCamps(g).length;if(!confirm(`Delete "${g.name}"?${n?` Its ${n} camp${n>1?'s':''} will be kept and become independent.`:''}`))return;DB.camps.forEach(c=>{if(c.groupId===id)c.groupId=null});DB.groups=DB.groups.filter(x=>x.id!==id);toast('Group deleted');go('groups')}
+function deleteGroup(id){const g=DB.groups.find(x=>x.id===id);const n=groupCamps(g).length;if(!confirm(`Move "${g.name}" to Recently deleted?${n?` Its ${n} camp${n>1?'s':''} will be kept and become independent — restoring the group puts them back.`:''} You can restore it for 30 days.`))return;
+  g.deletedAt=new Date().toISOString();g.memberIds=groupCamps(g).map(c=>c.id);DB.camps.forEach(c=>{if(c.groupId===id){c.groupId=null;c._ungrouped=true}});DB.groups=DB.groups.filter(x=>x.id!==id);DB.groupTrash.unshift(g);toast('Group moved to Recently deleted');go('groups')}
+function restoreGroup(id){const g=DB.groupTrash.find(x=>x.id===id);DB.groupTrash=DB.groupTrash.filter(x=>x.id!==id);const ids=g.memberIds||[];delete g.deletedAt;delete g.memberIds;DB.groups.push(g);DB.camps.forEach(c=>{if(ids.includes(c.id)){c.groupId=g.id;delete c._ungrouped}});if(GROUPMEM[g.id])delete GROUPMEM[g.id].deletedAt;toast(`Group restored with ${ids.length} camp${ids.length===1?'':'s'}`);go('group',g.id)}
+function purgeGroup(id){if(!confirm('Permanently delete this group? Its camps are unaffected.'))return;DB.groupTrash=DB.groupTrash.filter(x=>x.id!==id);delete GROUPMEM[id];store.set(GROUPS_KEY,JSON.stringify(GROUPMEM));render()}
 function openAssignModal(gid){const g=DB.groups.find(x=>x.id===gid);const list=DB.camps.filter(c=>c.groupId!==gid&&hasAccess(c));
   openModal(modalHeader(`Add camps to ${esc(g.name)}`)+`<form class="content" onsubmit="assignCamps(event,'${gid}')"><div class="checklist" style="max-height:50vh;overflow:auto">${list.map(c=>`<label><input type="checkbox" name="c" value="${c.id}"><span style="flex:1">${c.emoji} ${esc(c.name)} <small style="color:var(--muted)">· ${fmtShort(c.start)}${groupOf(c)?` · currently in ${esc(groupOf(c).name)}`:''}</small></span></label>`).join('')}</div>
   <footer><button type="button" class="btn" onclick="closeModal(true)">Cancel</button><button class="btn primary">Add selected</button></footer></form>`)}
-function assignCamps(e,gid){e.preventDefault();const ids=[...e.target.querySelectorAll('input:checked')].map(i=>i.value);ids.forEach(id=>{DB.camps.find(c=>c.id===id).groupId=gid});toast(`${ids.length} camp${ids.length===1?'':'s'} added`);closeModal(true);render()}
+function assignCamps(e,gid){e.preventDefault();const ids=[...e.target.querySelectorAll('input:checked')].map(i=>i.value);ids.forEach(id=>{const c=DB.camps.find(c=>c.id===id);c.groupId=gid;delete c._ungrouped});toast(`${ids.length} camp${ids.length===1?'':'s'} added`);closeModal(true);render()}
 function NoSpots(){
   const c=DB.camps.find(x=>x.id===state.campId);
   return`<div class="nospots">
@@ -3007,7 +3040,7 @@ function autoEmoji(){const f=$('#campForm');if(!f)return;const h=f.querySelector
 function saveCamp(e,id){
   e.preventDefault();const f=new FormData(e.target);const o=Object.fromEntries(f.entries());
   if(o.end<o.start){toast('End date must be after start date');return}
-  const data={name:o.name.trim(),type:o.type,groupId:o.groupId||null,location:o.location.trim()||'TBD',start:o.start,end:o.end,capacity:+o.capacity||1,waitlistMax:o.waitlistMax===''?null:Math.max(0,+o.waitlistMax||0),price:+o.price||0,ageMin:+o.ageMin||0,ageMax:+o.ageMax||0,color:o.color,emoji:o.emoji,description:o.description.trim(),published:f.has('published')};
+  const data={name:o.name.trim(),type:o.type,groupId:o.groupId||null,_ungrouped:!o.groupId,location:o.location.trim()||'TBD',start:o.start,end:o.end,capacity:+o.capacity||1,waitlistMax:o.waitlistMax===''?null:Math.max(0,+o.waitlistMax||0),price:+o.price||0,ageMin:+o.ageMin||0,ageMax:+o.ageMax||0,color:o.color,emoji:o.emoji,description:o.description.trim(),published:f.has('published')};
   if(id){const c=DB.camps.find(x=>x.id===id);Object.assign(c,data);const n=promoteWaitlist(c);toast(n?`Camp updated · ${n} camper${n>1?'s':''} joined from the waitlist`:'Camp updated');closeModal(true);render()}
   else{const c={id:uid(),...data,code:genCode(allCodes()),campers:[],staff:[],activities:[],checklist:[],announcements:[]};DB.camps.push(c);grantAccess(c);clearDraft();closeModal(true);save();copyText(fmtCode(c.code)).then(ok=>showCreatedModal(c.id,ok))}
 }
@@ -3052,9 +3085,9 @@ function joinCamp(e){e.preventDefault();const el=e.target.querySelector('.code-i
   grantAccess(c);closeModal(true);toast(`Welcome to ${c.name}! 🎉`);go('camp',c.id)}
 
 function deleteCamp(id){const c=DB.camps.find(x=>x.id===id);if(!confirm(`Move "${c.name}" to Recently deleted? You can restore it for 30 days.`))return;DB.camps=DB.camps.filter(x=>x.id!==id);c.deletedAt=new Date().toISOString();DB.trash.unshift(c);toast('Camp moved to Recently deleted');go('camps')}
-function restoreCamp(id){const c=DB.trash.find(x=>x.id===id);DB.trash=DB.trash.filter(x=>x.id!==id);delete c.deletedAt;DB.camps.push(c);toast('Camp restored');go('camp',id)}
+function restoreCamp(id){const c=DB.trash.find(x=>x.id===id);DB.trash=DB.trash.filter(x=>x.id!==id);delete c.deletedAt;if(c.groupId&&!DB.groups.some(g=>g.id===c.groupId))c.groupId=null;DB.camps.push(c);toast('Camp restored');go('camp',id)}
 function purgeCamp(id){if(!confirm('Permanently delete this camp? This cannot be undone.'))return;DB.trash=DB.trash.filter(x=>x.id!==id);render()}
-function purgeOldTrash(){const cutoff=Date.now()-30*86400000;DB.trash=(DB.trash||[]).filter(c=>new Date(c.deletedAt).getTime()>cutoff)}
+function purgeOldTrash(){const cutoff=Date.now()-30*86400000;DB.trash=(DB.trash||[]).filter(c=>new Date(c.deletedAt).getTime()>cutoff);DB.groupTrash=(DB.groupTrash||[]).filter(g=>new Date(g.deletedAt).getTime()>cutoff)}
 function duplicateCamp(id){const c=DB.camps.find(x=>x.id===id);const n=JSON.parse(JSON.stringify(c));n.id=uid();n.code=genCode(allCodes());grantAccess(n);n.name=c.name+' (copy)';n.campers=[];n.published=false;n.activities.forEach(a=>a.id=uid());n.staff.forEach(a=>a.id=uid());(n.announcements||[]).forEach(a=>a.id=uid());n.checklist.forEach(a=>{a.id=uid();a.done=false});DB.camps.push(n);toast('Camp duplicated as draft');go('camp',n.id)}
 function togglePublish(id){const c=DB.camps.find(x=>x.id===id);c.published=!c.published;toast(c.published?'Camp published':'Camp moved to drafts');render()}
 
@@ -3128,9 +3161,9 @@ function removeCheck(cid,id){const c=DB.camps.find(x=>x.id===cid);c.checklist=c.
 /* ============ Import / export ============ */
 function exportData(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(DB,null,2));a.download=`campuser-backup-${today()}.json`;a.click();toast('Backup downloaded')}
 function importData(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.camps))throw 0;DB=normalize(d);DB.camps.forEach(grantAccess);save();toast('Data imported');go('dashboard')}catch(e){toast('Invalid backup file')}};r.readAsText(f);input.value=''}
-function resetData(){if(!confirm('Delete ALL camps and data? This cannot be undone.'))return;DB=normalize(seed());ACCESS=new Set();saveAccess();clearDraft();save._last=null;save();toast('All data cleared');go('dashboard')}
+function resetData(){if(!confirm('Delete ALL camps and data? This cannot be undone.'))return;GROUPMEM={};store.set(GROUPS_KEY,'{}');store.del(STATE_KEY);DB=normalize(seed());ACCESS=new Set();saveAccess();clearDraft();save._last=null;save();toast('All data cleared');go('dashboard')}
 
-render();
+restoreView();render();
 function handleHash(){const m=location.hash.match(/#join=(\d{16})/);if(!m)return;history.replaceState(null,'',location.pathname+location.search);const code=m[1];const c=campByCode(code);
   if(c&&hasAccess(c)){go('camp',c.id);return}
   openJoinModal(c?c.id:null);const inp=$('.code-input');if(inp){inp.value=code;fmtCodeInput(inp)}
