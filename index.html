@@ -2927,7 +2927,7 @@ function Groups(){
   const list=DB.groups.filter(g=>!q||g.name.toLowerCase().includes(q)||(g.description||'').toLowerCase().includes(q)).sort((a,b)=>a.name.localeCompare(b.name));
   return topbar('Businesses & camp groups',`${DB.groups.length} group${DB.groups.length===1?'':'s'} · organize camps under one organization`,`<button class="btn primary" onclick="openGroupForm()">${ICONS.plus} New group</button>`)+
   `<div class="toolbar"><div class="search">${ICONS.search}<input placeholder="Search groups…" value="${esc(state.q)}" oninput="state.q=this.value;renderKeepFocus(this)"></div></div>
-  ${list.length?`<div class="camps">${list.map(GroupCard).join('')}</div>`:`<div class="empty"><div class="big">🏢</div><p>${DB.groups.length?'No groups match your search.':'No groups yet. Create a business or camp group, then add camps to it — like "Sunny Days Youth Org" with its summer, spring and sports camps.'}</p><button class="btn primary" onclick="openGroupForm()">${ICONS.plus} Create your first group</button></div>`}
+  ${list.length?`<div class="camps">${list.map(GroupCard).join('')}</div>`:`<div class="empty"><div class="big">🏢</div><p>${DB.groups.length?'No groups match your search.':'No groups yet. Create a business or camp group, then add camps to it.'}</p><button class="btn primary" onclick="openGroupForm()">${ICONS.plus} Create your first group</button></div>`}
   ${DB.groupTrash.length?`<details class="trash"><summary>🗑️ Recently deleted groups (${DB.groupTrash.length})</summary><ul class="ul">${DB.groupTrash.map(g=>`<li style="cursor:default"><div class="date" style="background:${g.color};font-size:22px">${g.emoji}</div><div class="info"><div>${esc(g.name)}</div><small>Deleted ${fmt(g.deletedAt.slice(0,10))} · remembers ${(g.memberIds||[]).length} camp${(g.memberIds||[]).length===1?'':'s'}</small></div><button class="btn sm" onclick="restoreGroup('${g.id}')">Restore</button><button class="btn sm danger" onclick="purgeGroup('${g.id}')">Delete forever</button></li>`).join('')}</ul></details>`:''}`;
 }
 function GroupCard(g){
@@ -2969,12 +2969,12 @@ function openGroupForm(id){
   openModal(modalHeader(id?'Edit group':'Create a business / camp group')+`<form class="content" id="groupForm" onsubmit="saveGroup(event,'${id||''}')">
     <input type="hidden" name="color" value="${g.color}"><input type="hidden" name="emoji" value="${g.emoji}">
     <div class="form">
-      ${field('Organization name',`<input name="name" required placeholder="e.g. Sunny Days Youth Organization" value="${esc(g.name)}">`,true)}
-      ${field('Website (optional)',`<input name="website" placeholder="sunnydays.org" value="${esc(g.website)}">`)}
-      ${field('Contact (optional)',`<input name="contact" placeholder="hello@sunnydays.org" value="${esc(g.contact)}">`)}
+      ${field('Organization name',`<input name="name" required placeholder="Organization name" value="${esc(g.name)}">`,true)}
+      ${field('Website (optional)',`<input name="website" placeholder="Website" value="${esc(g.website)}">`)}
+      ${field('Contact (optional)',`<input name="contact" placeholder="Email or phone" value="${esc(g.contact)}">`)}
       ${field('Icon',`<div class="emojis">${GROUP_EMOJIS.map(e=>`<span class="${g.emoji===e?'sel':''}" onclick="pickG(this,'emoji','${e}')">${e}</span>`).join('')}</div>`,true)}
       ${field('Color',`<div class="swatches">${COLORS.map(k=>`<span class="${g.color===k?'sel':''}" style="background:${k}" onclick="pickG(this,'color','${k}')"></span>`).join('')}</div>`,true)}
-      ${field('Description',`<textarea name="description" placeholder="What does this organization do?">${esc(g.description)}</textarea>`,true)}
+      ${field('Description',`<textarea name="description" placeholder="Description">${esc(g.description)}</textarea>`,true)}
     </div>
     <footer><button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">${id?'Save changes':'Create group'}</button></footer></form>`);
 }
@@ -3026,7 +3026,7 @@ function CampDetail(){
       <div class="post-actions"><button class="icon-btn" title="${a.pinned?'Unpin':'Pin to top'}" onclick="togglePin('${c.id}','${a.id}')">${a.pinned?'📌':'📍'}</button><button class="icon-btn" title="Copy text" onclick="copyAnnouncement('${c.id}','${a.id}')">📋</button><button class="icon-btn" onclick="openAnnouncementForm('${c.id}','${a.id}')">${ICONS.edit}</button><button class="icon-btn" onclick="removeAnnouncement('${c.id}','${a.id}')">${ICONS.trash}</button></div></div>
       ${a.body?`<div class="post-body">${linkify(a.body)}</div>`:''}
       ${a.link?`<a class="post-link" href="${esc(a.link)}" target="_blank" rel="noopener"><span class="post-link-ic">🔗</span><span><b>${esc(a.linkLabel||a.link)}</b><small>${esc(a.link)}</small></span></a>`:''}
-    </article>`).join('')}</div>`:`<div class="empty"><div class="big">📣</div><p>No announcements yet. Post updates, packing lists, photo album links, forms — anything families need.</p><button class="btn primary" onclick="openAnnouncementForm('${c.id}')">${ICONS.plus} Post your first announcement</button></div>`}</div>`;
+    </article>`).join('')}</div>`:`<div class="empty"><div class="big">📣</div><p>No announcements yet.</p><button class="btn primary" onclick="openAnnouncementForm('${c.id}')">${ICONS.plus} Post your first announcement</button></div>`}</div>`;
   } else if(state.tab==='campers'){
     const adm=isAdmin(c);
     body=`<div class="card" style="padding:6px 10px"><div style="display:flex;justify-content:space-between;align-items:center;padding:10px 10px 6px;flex-wrap:wrap;gap:8px"><h2 style="margin:0">Roster · ${e}/${c.capacity} enrolled, ${waitlisted(c)}${waitMax(c)!=null?`/${waitMax(c)}`:''} waitlisted</h2><div style="display:flex;gap:6px;flex-wrap:wrap">${adm?`<button class="btn sm" onclick="openBulkRemove('${c.id}')">${ICONS.trash} Remove campers…</button>`:`<button class="btn sm" onclick="openAdminModal('${c.id}','manage the roster')">${ICONS.shield} Admin sign-in</button>`}<button class="btn primary sm" onclick="openCamperForm('${c.id}')">${ICONS.plus} Add camper</button></div></div>
@@ -3046,7 +3046,7 @@ function CampDetail(){
     const done=c.checklist.filter(x=>x.done).length;
     body=`<div class="card"><h2>Planning checklist · ${done}/${c.checklist.length} done</h2>
     ${c.checklist.length?`<div class="progress" style="margin-bottom:12px"><i style="width:${c.checklist.length?done/c.checklist.length*100:0}%"></i></div><div class="checklist">${c.checklist.map(x=>`<label><input type="checkbox" ${x.done?'checked':''} onchange="toggleCheck('${c.id}','${x.id}')"><span class="${x.done?'done':''}" style="flex:1">${esc(x.text)}</span><button class="icon-btn" onclick="event.preventDefault();removeCheck('${c.id}','${x.id}')">${ICONS.trash}</button></label>`).join('')}</div>`:'<p class="sub">Nothing on the list yet.</p>'}
-    <form class="inline-add" onsubmit="event.preventDefault();addCheck('${c.id}',this.t.value);this.reset()"><input name="t" placeholder="Add a task, e.g. 'Confirm bus rental'" required><button class="btn primary">Add</button></form></div>`;
+    <form class="inline-add" onsubmit="event.preventDefault();addCheck('${c.id}',this.t.value);this.reset()"><input name="t" placeholder="Add a task" required><button class="btn primary">Add</button></form></div>`;
   }
   const g=groupOf(c);
   return`<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><button class="back" onclick="go('camps')">${ICONS.back} All camps</button>${g?`<span class="back" style="cursor:default">/</span><button class="back" onclick="go('group','${g.id}')">${g.emoji} ${esc(g.name)}</button>`:''}</div>
@@ -3090,7 +3090,7 @@ function openCampForm(id,presetGroup){
     ${draft?`<div class="draft-note">📝 Restored your unsaved draft. <a href="#" onclick="event.preventDefault();discardDraft()">Start fresh</a></div>`:''}
     <input type="hidden" name="color" value="${c.color}"><input type="hidden" name="emoji" value="${c.emoji}" data-manual="${id||(draft&&draft._manual)?'1':''}">
     <div class="form">
-      ${field('Camp name',`<input name="name" required placeholder="e.g. Pine Ridge Summer Camp" value="${esc(c.name)}" oninput="autoEmoji()">`,true)}
+      ${field('Camp name',`<input name="name" required placeholder="Camp name" value="${esc(c.name)}" oninput="autoEmoji()">`,true)}
       ${field('Type',`<select name="type" onchange="autoEmoji()">${TYPES.map(t=>`<option ${c.type===t?'selected':''}>${t}</option>`).join('')}</select>`)}
       ${field('Business / camp group',`<select name="groupId"><option value="">— Independent (no group) —</option>${DB.groups.map(g=>`<option value="${g.id}" ${(c.groupId||'')===g.id?'selected':''}>${g.emoji} ${esc(g.name)}</option>`).join('')}</select>`)}
       ${field('Location',`<input name="location" placeholder="City or venue" value="${esc(c.location)}">`)}
@@ -3103,7 +3103,7 @@ function openCampForm(id,presetGroup){
       ${field('Max age',`<input type="number" name="ageMax" min="0" value="${c.ageMax}">`)}
       ${field('Icon <span id="emojiHint" style="font-weight:500;text-transform:none;letter-spacing:0">· auto-picked from the name — click to override</span>',`<div class="emojis" id="emojiPicker">${EMOJIS.map(e=>`<span class="${c.emoji===e?'sel':''}" onclick="pick(this,'emoji','${e}')">${e}</span>`).join('')}</div>`,true)}
       ${field('Color',`<div class="swatches">${COLORS.map(k=>`<span class="${c.color===k?'sel':''}" style="background:${k}" onclick="pick(this,'color','${k}')"></span>`).join('')}</div>`,true)}
-      ${field('Description',`<textarea name="description" placeholder="What makes this camp special?">${esc(c.description)}</textarea>`,true)}
+      ${field('Description',`<textarea name="description" placeholder="Description">${esc(c.description)}</textarea>`,true)}
       <div class="field full"><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:14px;color:var(--ink)"><input type="checkbox" name="published" ${c.published?'checked':''} style="width:16px;height:16px;accent-color:var(--brand)">Published (visible on schedule and open for registration)</label></div>
     </div>
     <footer>${!id?`<span class="left sub" style="align-self:center">Draft saves automatically</span>`:''}<button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">${id?'Save changes':'Create camp'}</button></footer></form>`);
@@ -3178,7 +3178,7 @@ function openRegisterModal(cid){const c=DB.camps.find(x=>x.id===cid);const pr=ge
     <div class="reg-head"><span class="pill active">✓ Code accepted</span><p class="sub" style="margin:8px 0 0">One more step — tell the camp who you are. The camp admin will see your full name and age on the roster.</p></div>
     <div class="form" style="margin-top:14px">
       ${field('Full name *',`<input name="name" required minlength="2" autocomplete="name" placeholder="First and last name" value="${esc(pr.name)}" oninput="regCheck(this.form)">`,true)}
-      ${field('Age *',`<input type="number" name="age" required min="1" max="120" inputmode="numeric" placeholder="e.g. 12" value="${pr.age||''}" oninput="regCheck(this.form)">`)}
+      ${field('Age *',`<input type="number" name="age" required min="1" max="120" inputmode="numeric" placeholder="Age" value="${pr.age||''}" oninput="regCheck(this.form)">`)}
       ${field('Parent / guardian (optional)',`<input name="guardian" autocomplete="off" value="${esc(pr.guardian||'')}">`)}
       ${field('Contact (optional)',`<input name="contact" autocomplete="email" placeholder="Email or phone" value="${esc(pr.contact||'')}">`,true)}
       ${c.ageMin||c.ageMax?`<p class="sub full" style="margin:0" id="ageHint">This camp is for ages ${c.ageMin}–${c.ageMax}.</p>`:''}
@@ -3236,7 +3236,7 @@ function openBulkRemove(cid){const c=DB.camps.find(x=>x.id===cid);if(!requireAdm
   openModal(modalHeader(`Remove campers · ${esc(c.name)}`)+`<form class="content" onsubmit="bulkRemove(event,'${cid}')">
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"><button type="button" class="btn sm" onclick="bulkPick(this.form,()=>true)">Select all</button><button type="button" class="btn sm" onclick="bulkPick(this.form,s=>s==='Waitlisted')">Waitlisted</button><button type="button" class="btn sm" onclick="bulkPick(this.form,s=>s==='Cancelled')">Cancelled</button><button type="button" class="btn sm" onclick="bulkPick(this.form,()=>false)">Clear</button></div>
     <div class="checklist" style="max-height:45vh;overflow:auto">${c.campers.map(p=>`<label><input type="checkbox" name="c" value="${p.id}" data-status="${p.status}" onchange="bulkCount(this.form)"><span class="avatar" style="background:${avColor(p.name)};margin:0;width:26px;height:26px;font-size:10px">${initials(p.name)}</span><span style="flex:1">${esc(p.name)} <small style="color:var(--muted)">· ${p.status}${p.guardian?` · ${esc(p.guardian)}`:''}</small></span></label>`).join('')||'<p class="sub">No campers to remove.</p>'}</div>
-    <div class="field" style="margin-top:12px"><label>Reason (optional, shown in the removed log)</label><input name="reason" placeholder="e.g. No-show, payment not received…"></div>
+    <div class="field" style="margin-top:12px"><label>Reason (optional, shown in the removed log)</label><input name="reason" placeholder="Reason"></div>
     <footer><span class="left sub" id="bulkN" style="align-self:center">0 selected</span><button type="button" class="btn" onclick="closeModal(true)">Cancel</button><button class="btn danger" id="bulkBtn" disabled>Remove selected</button></footer></form>`)}
 function bulkPick(f,fn){f.querySelectorAll('input[name=c]').forEach(i=>i.checked=fn(i.dataset.status));bulkCount(f)}
 function bulkCount(f){const n=f.querySelectorAll('input[name=c]:checked').length;$('#bulkN').textContent=`${n} selected`;$('#bulkBtn').disabled=!n;$('#bulkBtn').textContent=n?`Remove ${n} camper${n>1?'s':''}`:'Remove selected'}
@@ -3247,7 +3247,7 @@ function setStatus(cid,pid,s){const c=DB.camps.find(x=>x.id===cid);if(!requireAd
 function openActivityForm(cid,day,aid){
   const c=DB.camps.find(x=>x.id===cid);const a=aid?c.activities.find(x=>x.id===aid):{day,time:'09:00',title:'',location:'',notes:''};
   openModal(modalHeader(aid?'Edit activity':'Add activity')+`<form class="content" onsubmit="saveActivity(event,'${cid}','${aid||''}')"><div class="form">
-    ${field('Activity',`<input name="title" required placeholder="e.g. Canoeing 101" value="${esc(a.title)}">`,true)}
+    ${field('Activity',`<input name="title" required placeholder="Activity name" value="${esc(a.title)}">`,true)}
     ${field('Day',`<select name="day">${Array.from({length:days(c)},(_,i)=>`<option value="${i+1}" ${a.day===i+1?'selected':''}>Day ${i+1} · ${fmtShort(addDays(c.start,i))}</option>`).join('')}</select>`)}
     ${field('Time',`<input type="time" name="time" required value="${a.time}">`)}
     ${field('Location',`<input name="location" value="${esc(a.location)}">`)}${field('Notes',`<input name="notes" value="${esc(a.notes)}">`)}
@@ -3258,7 +3258,7 @@ function saveActivity(e,cid,aid){e.preventDefault();const o=Object.fromEntries(n
 function removeActivity(cid,aid){const c=DB.camps.find(x=>x.id===cid);c.activities=c.activities.filter(x=>x.id!==aid);render()}
 
 function openStaffForm(cid){openModal(modalHeader('Add staff member')+`<form class="content" onsubmit="saveStaff(event,'${cid}')"><div class="form">
-  ${field('Name',`<input name="name" required>`)}${field('Role',`<input name="role" list="roles" placeholder="Counselor, Lifeguard…" required><datalist id="roles"><option>Camp Director</option><option>Counselor</option><option>Lifeguard</option><option>Nurse</option><option>Instructor</option><option>Cook</option><option>Volunteer</option></datalist>`)}
+  ${field('Name',`<input name="name" required>`)}${field('Role',`<input name="role" list="roles" placeholder="Role" required><datalist id="roles"><option>Camp Director</option><option>Counselor</option><option>Lifeguard</option><option>Nurse</option><option>Instructor</option><option>Cook</option><option>Volunteer</option></datalist>`)}
   ${field('Contact',`<input name="contact">`,true)}</div><footer><button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">Add</button></footer></form>`)}
 function saveStaff(e,cid){e.preventDefault();const o=Object.fromEntries(new FormData(e.target).entries());DB.camps.find(x=>x.id===cid).staff.push({id:uid(),name:o.name.trim(),role:o.role.trim(),contact:o.contact.trim()});toast('Staff added');closeModal(true);render()}
 function removeStaff(cid,sid){const c=DB.camps.find(x=>x.id===cid);c.staff=c.staff.filter(x=>x.id!==sid);render()}
@@ -3266,10 +3266,10 @@ function removeStaff(cid,sid){const c=DB.camps.find(x=>x.id===cid);c.staff=c.sta
 function openAnnouncementForm(cid,aid){
   const c=DB.camps.find(x=>x.id===cid);const a=aid?ann(c).find(x=>x.id===aid):{title:'',body:'',link:'',linkLabel:'',pinned:false};
   openModal(modalHeader(aid?'Edit announcement':'New announcement')+`<form class="content" onsubmit="saveAnnouncement(event,'${cid}','${aid||''}')"><div class="form">
-    ${field('Title',`<input name="title" required placeholder="e.g. Packing list is ready!" value="${esc(a.title)}">`,true)}
-    ${field('Message',`<textarea name="body" placeholder="Write your update… URLs are clickable automatically.">${esc(a.body)}</textarea>`,true)}
+    ${field('Title',`<input name="title" required placeholder="Title" value="${esc(a.title)}">`,true)}
+    ${field('Message',`<textarea name="body" placeholder="Message (URLs become clickable)">${esc(a.body)}</textarea>`,true)}
     ${field('Link URL (optional)',`<input type="url" name="link" placeholder="https://…" value="${esc(a.link)}">`)}
-    ${field('Link label',`<input name="linkLabel" placeholder="e.g. Photo album" value="${esc(a.linkLabel)}">`)}
+    ${field('Link label',`<input name="linkLabel" placeholder="Link label" value="${esc(a.linkLabel)}">`)}
     <div class="field full"><label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:14px;color:var(--ink)"><input type="checkbox" name="pinned" ${a.pinned?'checked':''} style="width:16px;height:16px;accent-color:var(--brand)">Pin to top</label></div>
     </div><footer><button type="button" class="btn" onclick="closeModal()">Cancel</button><button class="btn primary">${aid?'Save':'Post'}</button></footer></form>`);
 }
