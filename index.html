@@ -241,6 +241,14 @@
   .group-strip{display:flex;gap:4px;flex-wrap:wrap}
   .group-strip span{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:15px}
   .group-strip .more{background:#eef1ef;color:var(--muted);font-size:11px;font-weight:700}
+  .mem-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:600px){.mem-grid{grid-template-columns:1fr}}
+  .mem-card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fafbfa}
+  .mem-card h3{margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+  .mem-row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .mem-row:last-of-type{border-bottom:0}
+  .snap-list{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}
+  .snap{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:13.5px}
   .self-tag{display:inline-block;margin-left:8px;font-size:10.5px;font-weight:700;color:#1f5a3f;background:var(--brand-soft);padding:2px 7px;border-radius:99px;vertical-align:middle;white-space:nowrap}
   .reg-head{background:#fafbfa;border:1px solid var(--line);border-radius:12px;padding:12px 14px}
   .admin-note{margin:0 10px 8px;background:#f4f6f3;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--muted)}
@@ -304,7 +312,7 @@
   <div class="spacer"></div>
   <div class="foot">
     <span id="saveBadge">Autosave on</span> · stored on this device
-    <div><button onclick="exportData()">Export</button><button onclick="document.getElementById('importFile').click()">Import</button><button onclick="resetData()">Clear all</button></div>
+    <div><button onclick="openMemoryPanel()">🧠 Memory</button><button onclick="exportData()">Export</button><button onclick="document.getElementById('importFile').click()">Import</button><button onclick="resetData()">Clear all</button></div>
     <input type="file" id="importFile" accept="application/json" hidden onchange="importData(this)">
   </div>
 </aside>
@@ -2692,7 +2700,16 @@ const fmtAdminKey=k=>String(k||'').replace(/(\d{4})(?=\d)/g,'$1-');
 const PROFILE_KEY='campuser.profile';
 function getProfile(){try{return JSON.parse(store.get(PROFILE_KEY)||'null')}catch(e){return null}}
 function saveProfile(p){store.set(PROFILE_KEY,JSON.stringify(p))}
-function myCamperIn(c){const pr=getProfile();if(!pr)return null;return c.campers.find(p=>p.selfJoined&&p.name.toLowerCase()===pr.name.toLowerCase())||null}
+const REG_KEY='campuser.registrations';   // permanent: campId -> {camperId,name,age,guardian,contact,status,campName,campCode,joinedAt}
+let REGS={};try{REGS=JSON.parse(store.get(REG_KEY)||'{}')||{}}catch(e){}
+function rememberRegistration(c,p){REGS[c.id]={camperId:p.id,name:p.name,age:p.age,guardian:p.guardian||'',contact:p.contact||'',status:p.status,campName:c.name,campEmoji:c.emoji,campCode:c.code,joinedAt:p.joinedAt||new Date().toISOString(),updatedAt:new Date().toISOString()};store.set(REG_KEY,JSON.stringify(REGS))}
+function forgetRegistration(cid){delete REGS[cid];store.set(REG_KEY,JSON.stringify(REGS))}
+function myCamperIn(c){const r=REGS[c.id];if(r){const byId=c.campers.find(p=>p.id===r.camperId);if(byId)return byId;const byName=c.campers.find(p=>p.name.toLowerCase()===r.name.toLowerCase());if(byName)return byName}const pr=getProfile();if(!pr)return null;return c.campers.find(p=>p.selfJoined&&p.name.toLowerCase()===pr.name.toLowerCase())||null}
+/* Re-create my roster entry if it vanished (data reset / restored older backup) but I still have access */
+function recoverRegistrations(){let n=0;for(const cid in REGS){const r=REGS[cid];const c=DB.camps.find(x=>x.id===cid);if(!c||!ACCESS.has(cid))continue;if(c.campers.some(p=>p.id===r.camperId||p.name.toLowerCase()===r.name.toLowerCase()))continue;if(c.removed&&c.removed.some(p=>p.id===r.camperId))continue;/* admin removed me — respect it */
+  const status=r.status==='Cancelled'?'Cancelled':enrolled(c)>=c.capacity?(waitFull(c)?'Cancelled':'Waitlisted'):'Registered';const p={id:r.camperId,name:r.name,age:r.age,guardian:r.guardian,contact:r.contact,status,notes:'',selfJoined:true,joinedAt:r.joinedAt,recovered:true};stampWaitlist(p);c.campers.push(p);n++}return n}
+/* Keep the registry in sync with status changes / edits done by admins */
+function syncRegistrations(){for(const cid in REGS){const c=DB.camps.find(x=>x.id===cid);if(!c)continue;const p=c.campers.find(x=>x.id===REGS[cid].camperId);if(p&&(p.status!==REGS[cid].status||p.age!==REGS[cid].age||p.name!==REGS[cid].name)){REGS[cid]={...REGS[cid],name:p.name,age:p.age,status:p.status,updatedAt:new Date().toISOString()};store.set(REG_KEY,JSON.stringify(REGS))}}}
 function requireAdmin(c,what='do that'){if(isAdmin(c))return true;openAdminModal(c.id,what);return false}
 function revokeAccess(c){ACCESS.delete(c.id);saveAccess()}
 const myCamps=()=>DB.camps.filter(hasAccess);
@@ -2700,16 +2717,29 @@ function knownCodeFor(id){for(const k in CODES)if(CODES[k].id===id)return k;retu
 function normalize(d){d.groups||(d.groups=[]);d.groupTrash||(d.groupTrash=[]);recoverGroups(d);d.groups.forEach(g=>{g.emoji||(g.emoji='🏢');g.color||(g.color=COLORS[1]);g.description||(g.description='');g.website||(g.website='');g.contact||(g.contact='')});const gids=new Set(d.groups.map(g=>g.id));const codes=new Set();d.camps.forEach(c=>{c.campers||(c.campers=[]);c.staff||(c.staff=[]);c.activities||(c.activities=[]);c.checklist||(c.checklist=[]);c.announcements||(c.announcements=[]);c.removed||(c.removed=[]);c.adminKey||(c.adminKey=genAdminKey());if(c.groupId&&!gids.has(c.groupId))c.groupId=null;if(!c.code){c.code=knownCodeFor(c.id)||genCode(codes);if(!knownCodeFor(c.id))c._legacy=true}codes.add(c.code)});d.trash||(d.trash=[]);d.trash.forEach(c=>{if(!c.code)c.code=genCode(codes);codes.add(c.code)});return d}
 let DB=load();
 DB.camps.forEach(c=>{if(c._legacy){delete c._legacy;grantAccess(c)}});rememberAllCodes();
+if(recoverRegistrations())setTimeout(()=>toast('Restored your registration from memory'),600);
 if(!store.get('campuser.adminsMigrated')){DB.camps.filter(hasAccess).forEach(grantAdmin);store.set('campuser.adminsMigrated','1')}
 function load(){return normalize(parse(store.get(KEY))||parse(store.get(BACKUP_KEY))||seed())}
 let lastSaved=null,saveTimer=null;
 function save(){
-  rememberAllCodes();rememberGroups();
+  rememberAllCodes();rememberGroups();syncRegistrations();
   const json=JSON.stringify(DB);
   if(json===save._last)return;
   const prev=store.get(KEY);if(prev&&prev!==json)store.set(BACKUP_KEY,prev);
   store.set(KEY,json);save._last=json;lastSaved=new Date();updateSaveBadge();
+  snapshots.maybe(json);
 }
+/* ---------- Snapshot history: automatic versioned backups in IndexedDB ---------- */
+const snapshots={
+  MAX:30,MIN_GAP:5*60*1000,_last:0,
+  async list(){try{return JSON.parse(await idb.get('campuser.snapshots.index')||'[]')}catch(e){return[]}},
+  async maybe(json,reason='auto'){const now=Date.now();if(reason==='auto'&&now-this._last<this.MIN_GAP)return;this._last=now;await this.take(json,reason)},
+  async take(json,reason='manual'){json=json||JSON.stringify(DB);const d=parse(json);if(!d)return;const id='snap_'+Date.now();const meta={id,at:new Date().toISOString(),reason,camps:d.camps.length,groups:(d.groups||[]).length,campers:d.camps.reduce((s,c)=>s+c.campers.length,0),bytes:json.length};
+    await idb.set(id,json);let idx=await this.list();idx.unshift(meta);const keep=idx.filter(m=>m.reason!=='auto').slice(0,10).concat(idx.filter(m=>m.reason==='auto').slice(0,this.MAX));const drop=idx.filter(m=>!keep.includes(m));drop.forEach(m=>idb.set(m.id,null));idx=idx.filter(m=>keep.includes(m));await idb.set('campuser.snapshots.index',JSON.stringify(idx));return meta},
+  async restore(id){const json=await idb.get(id);const d=parse(json);if(!d){toast('Snapshot unavailable');return}if(!confirm('Restore this snapshot? Your current data will be saved as a snapshot first.'))return;await this.take(JSON.stringify(DB),'before-restore');DB=normalize(d);DB.camps.forEach(c=>{if(REGS[c.id]||ADMIN.has(c.id))grantAccess(c)});recoverRegistrations();save._last=null;save();toast('Snapshot restored');go('dashboard')},
+  async remove(id){await idb.set(id,null);const idx=(await this.list()).filter(m=>m.id!==id);await idb.set('campuser.snapshots.index',JSON.stringify(idx));openMemoryPanel()}
+};
+window.addEventListener('pagehide',()=>snapshots.maybe(JSON.stringify(DB),'session'));
 function updateSaveBadge(){const b=document.getElementById('saveBadge');if(!b||!lastSaved)return;b.textContent='✓ Saved '+lastSaved.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}
 // If localStorage was unavailable at boot but IndexedDB has newer data, recover it
 idb.get(ADMIN_KEY).then(v=>{try{const a=JSON.parse(v||'[]');if(a.length&&!store.get(ADMIN_KEY)){ADMIN=new Set(a);saveAdmin();render()}}catch(e){}});
@@ -3165,7 +3195,7 @@ function registerAndJoin(e,cid){e.preventDefault();const c=DB.camps.find(x=>x.id
   let p=c.campers.find(x=>x.name.toLowerCase()===name.toLowerCase());
   if(p){Object.assign(p,{age,guardian:guardian||p.guardian,contact:contact||p.contact,selfJoined:true,joinedAt:p.joinedAt||new Date().toISOString()})}
   else{const status=enrolled(c)>=c.capacity?'Waitlisted':'Registered';p={id:uid(),name,age,guardian,contact,status,notes:'',selfJoined:true,joinedAt:new Date().toISOString()};stampWaitlist(p);c.campers.push(p)}
-  grantAccess(c);closeModal(true);go('camp',c.id);
+  grantAccess(c);rememberRegistration(c,p);closeModal(true);go('camp',c.id);
   if(p.status==='Waitlisted')showWaitlistModal(c.id,p.id);else toast(`Welcome to ${c.name}, ${name.split(' ')[0]}! 🎉 You're registered.`)}
 
 function deleteCamp(id){const c=DB.camps.find(x=>x.id===id);if(!requireAdmin(c,'delete this camp'))return;if(!confirm(`Move "${c.name}" to Recently deleted? You can restore it for 30 days.`))return;DB.camps=DB.camps.filter(x=>x.id!==id);c.deletedAt=new Date().toISOString();DB.trash.unshift(c);toast('Camp moved to Recently deleted');go('camps')}
@@ -3257,9 +3287,32 @@ function toggleCheck(cid,id){const x=DB.camps.find(c=>c.id===cid).checklist.find
 function removeCheck(cid,id){const c=DB.camps.find(x=>x.id===cid);c.checklist=c.checklist.filter(i=>i.id!==id);render()}
 
 /* ============ Import / export ============ */
-function exportData(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(DB,null,2));a.download=`campuser-backup-${today()}.json`;a.click();toast('Backup downloaded')}
-function importData(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.camps))throw 0;DB=normalize(d);DB.camps.forEach(c=>{grantAccess(c);grantAdmin(c)});save();toast('Data imported');go('dashboard')}catch(e){toast('Invalid backup file')}};r.readAsText(f);input.value=''}
-function resetData(){if(!confirm('Delete ALL camps and data? This cannot be undone.'))return;GROUPMEM={};store.set(GROUPS_KEY,'{}');store.del(STATE_KEY);DB=normalize(seed());ACCESS=new Set();saveAccess();ADMIN=new Set();saveAdmin();clearDraft();save._last=null;save();toast('All data cleared');go('dashboard')}
+async function openMemoryPanel(){
+  const pr=getProfile();const snaps=await snapshots.list();const regs=Object.entries(REGS);
+  const kb=n=>n>1048576?(n/1048576).toFixed(1)+' MB':Math.max(1,Math.round(n/1024))+' KB';
+  let usage='';try{const est=await navigator.storage?.estimate?.();if(est)usage=`${kb(est.usage||0)} used of ${kb(est.quota||0)} available`}catch(e){}
+  const persisted=await (navigator.storage?.persisted?.()||Promise.resolve(false));
+  const row=(k,v)=>`<div class="mem-row"><span>${k}</span><b>${v}</b></div>`;
+  const reasonLabel={auto:'Auto',manual:'Manual',session:'Session end','before-restore':'Before restore','before-clear':'Before clear','before-import':'Before import'};
+  openModal(modalHeader('🧠 Memory')+`<div class="content">
+    <p class="sub" style="margin:0 0 14px">Everything Campuser remembers on this device. Data never leaves your browser unless you export it.</p>
+    <div class="mem-grid">
+      <div class="mem-card"><h3>Storage</h3>${row('Camps',DB.camps.length)}${row('Groups',DB.groups.length)}${row('Campers',DB.camps.reduce((s,c)=>s+c.campers.length,0))}${row('Recently deleted',DB.trash.length+DB.groupTrash.length)}${row('Last saved',lastSaved?lastSaved.toLocaleTimeString():'—')}${usage?row('Space',usage):''}${row('Protected from eviction',persisted?'Yes ✓':`<a href="#" onclick="event.preventDefault();requestPersist()">Request</a>`)}</div>
+      <div class="mem-card"><h3>Who you are</h3>${pr?`${row('Name',esc(pr.name))}${row('Age',pr.age||'—')}${pr.guardian?row('Guardian',esc(pr.guardian)):''}${pr.contact?row('Contact',esc(pr.contact)):''}<div style="margin-top:8px;display:flex;gap:6px"><button class="btn sm" onclick="editProfile()">Edit</button><button class="btn sm" onclick="if(confirm('Forget your saved name and age?')){store.del(PROFILE_KEY);openMemoryPanel()}">Forget</button></div>`:`<p class="sub" style="margin:0 0 8px">Not saved yet — it's remembered the first time you join a camp.</p><button class="btn sm" onclick="editProfile()">Add my details</button>`}</div>
+      <div class="mem-card"><h3>Your access</h3>${row('Camps unlocked',ACCESS.size)}${row('Camps you admin',ADMIN.size)}${row('Codes remembered',Object.keys(CODES).length)}${row('Groups remembered',Object.keys(GROUPMEM).length)}</div>
+      <div class="mem-card"><h3>Your registrations</h3>${regs.length?regs.map(([cid,r])=>{const live=DB.camps.find(c=>c.id===cid);return`<div class="mem-row" style="align-items:flex-start"><span>${r.campEmoji||'🏕️'} ${live?`<a href="#" onclick="event.preventDefault();closeModal(true);go('camp','${cid}')">${esc(r.campName)}</a>`:esc(r.campName)+' <small>(not on this device)</small>'}<br><small>${esc(r.name)}, ${r.age} · joined ${fmt(r.joinedAt.slice(0,10))}</small></span><b>${r.status}</b></div>`}).join(''):'<p class="sub" style="margin:0">No camps joined with a code yet.</p>'}</div>
+    </div>
+    <h3 style="font-size:15px;margin:18px 0 8px;display:flex;justify-content:space-between;align-items:center">Snapshots <button class="btn sm" onclick="snapshots.take(null,'manual').then(()=>{toast('Snapshot saved');openMemoryPanel()})">📸 Save snapshot now</button></h3>
+    <p class="sub" style="margin:0 0 8px">Automatic backups are taken as you work (at most every 5 minutes), when you leave, and before risky actions. Restore any of them.</p>
+    ${snaps.length?`<div class="snap-list">${snaps.map(m=>`<div class="snap"><div><b>${fmtTime(m.at)}</b> <span class="pill ${m.reason==='auto'?'past':m.reason==='manual'?'active':'draft'}">${reasonLabel[m.reason]||m.reason}</span><br><small class="sub">${m.camps} camp${m.camps===1?'':'s'} · ${m.groups} group${m.groups===1?'':'s'} · ${m.campers} camper${m.campers===1?'':'s'} · ${kb(m.bytes)}</small></div><div style="display:flex;gap:4px"><button class="btn sm" onclick="snapshots.restore('${m.id}')">Restore</button><button class="icon-btn" onclick="snapshots.remove('${m.id}')">${ICONS.trash}</button></div></div>`).join('')}</div>`:'<p class="sub">No snapshots yet.</p>'}
+    <footer><button class="btn" onclick="exportData()">⬇️ Export backup file</button><button class="btn primary" onclick="closeModal(true)">Done</button></footer></div>`)}
+async function requestPersist(){try{const ok=await navigator.storage.persist();toast(ok?'Storage is now protected':'Browser declined — install the app to protect storage')}catch(e){toast('Not supported in this browser')}openMemoryPanel()}
+function editProfile(){const pr=getProfile()||{name:'',age:'',guardian:'',contact:''};openModal(modalHeader('Your details')+`<form class="content" onsubmit="event.preventDefault();const f=event.target;saveProfile({name:f.querySelector('[name=name]').value.trim(),age:+f.querySelector('[name=age]').value||'',guardian:f.querySelector('[name=guardian]').value.trim(),contact:f.querySelector('[name=contact]').value.trim()});toast('Saved');openMemoryPanel()"><div class="form">
+  ${field('Full name',`<input name="name" required value="${esc(pr.name)}">`,true)}${field('Age',`<input type="number" name="age" min="1" max="120" value="${pr.age||''}">`)}${field('Guardian',`<input name="guardian" value="${esc(pr.guardian||'')}">`)}${field('Contact',`<input name="contact" value="${esc(pr.contact||'')}">`,true)}</div>
+  <footer><button type="button" class="btn" onclick="openMemoryPanel()">Back</button><button class="btn primary">Save</button></footer></form>`)}
+function exportData(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify({...DB,_memory:{access:[...ACCESS],admins:[...ADMIN],codes:CODES,groups:GROUPMEM,registrations:REGS,profile:getProfile()}},null,2));a.download=`campuser-backup-${today()}.json`;a.click();toast('Backup downloaded')}
+function importData(input){const f=input.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!Array.isArray(d.camps))throw 0;snapshots.take(JSON.stringify(DB),'before-import');const mem=d._memory;delete d._memory;if(mem){(mem.access||[]).forEach(id=>ACCESS.add(id));(mem.admins||[]).forEach(id=>ADMIN.add(id));Object.assign(CODES,mem.codes||{});Object.assign(GROUPMEM,mem.groups||{});Object.assign(REGS,mem.registrations||{});if(mem.profile&&!getProfile())saveProfile(mem.profile);saveAccess();saveAdmin();store.set(CODES_KEY,JSON.stringify(CODES));store.set(GROUPS_KEY,JSON.stringify(GROUPMEM));store.set(REG_KEY,JSON.stringify(REGS))}DB=normalize(d);if(!mem)DB.camps.forEach(c=>{grantAccess(c);grantAdmin(c)});recoverRegistrations();save._last=null;save();toast('Data imported');go('dashboard')}catch(e){toast('Invalid backup file')}};r.readAsText(f);input.value=''}
+function resetData(){if(!confirm('Delete ALL camps and data? A snapshot will be kept in Memory so you can undo.'))return;snapshots.take(JSON.stringify(DB),'before-clear');GROUPMEM={};store.set(GROUPS_KEY,'{}');store.del(STATE_KEY);DB=normalize(seed());ACCESS=new Set();saveAccess();ADMIN=new Set();saveAdmin();clearDraft();save._last=null;save();toast('All data cleared');go('dashboard')}
 
 restoreView();render();
 
@@ -3308,6 +3361,7 @@ function showInstallGuide(){
     <footer style="justify-content:center"><button class="btn" onclick="copyText(location.origin+location.pathname).then(ok=>toast(ok?'Link copied':'Could not copy'))">🔗 Copy link</button><button class="btn primary" onclick="closeModal(true)">Got it</button></footer></div>`);
 }
 updateInstallUI();
+if(DB.camps.length&&navigator.storage?.persist&&!store.get('campuser.persistAsked')){store.set('campuser.persistAsked','1');navigator.storage.persist().catch(()=>{})}
 // Home-screen shortcuts (from manifest) & PWA launch params
 (()=>{const a=new URLSearchParams(location.search).get('action');if(a==='newcamp')setTimeout(()=>openCampForm(),300);if(a==='join')setTimeout(()=>openJoinModal(),300);if(a||location.search.includes('source=pwa'))history.replaceState(null,'',location.pathname+location.hash)})();
 
